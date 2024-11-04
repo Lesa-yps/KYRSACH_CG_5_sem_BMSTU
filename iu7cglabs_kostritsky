@@ -1,0 +1,66 @@
+.PHONY: run clean release report-unittesting-latest.txt report-functesting-latest.txt format checkall saveolds
+
+# Релизный запуск
+run:
+	python3 main.py
+
+# Очистка
+clean:
+	rm -rf __pycache__ .ruff_cache .pytest_cache 2>/dev/null || true
+	if [ -d "out" ]; then rm -rf out/*; fi
+	if [ -d "results" ]; then rm -rf results/*; fi
+
+# Сборка приложения для конечного пользователя
+release:
+	mkdir out 2>/dev/null || true
+	for file in *.py; do \
+		if [ ! -f "$$file" ]; then \
+			continue; \
+		fi; \
+		if [ "$${file:0:4}" != "test" ]; then \
+			cp "$$file" out; \
+		fi; \
+	done
+
+# Проведение модульного тестирования
+report-unittesting-latest.txt:
+	@for file in test_*.py; do \
+		module=$$(basename "$$file" .py | sed 's/^test_\(.*\)$$/\1/'); \
+		coverage run --source="$$module" -m pytest "$$file" > /dev/null 2>&1; \
+	done > $@
+	coverage report -m | awk 'NR==3{sub("%", "", $$4); printf "%.2f\n", $$4/100}' > $@
+	pytest --verbose >> $@
+	coverage report -m >> $@
+	rm .coverage
+
+# Проведение функционального тестирования и формирование отчёта
+report-functesting-latest.txt:
+	mkdir results 2>/dev/null || true
+	coverage run --source=Floating_horizon -m pytest testFunc.py > /dev/null 2>&1 > $@
+	coverage report -m | awk 'NR==3{sub("%", "", $$4); printf "%.2f\n", $$4/100}' > $@
+	coverage report -m >> $@
+	rm .coverage
+	rm results/*.ps
+
+
+# Форматирует все исходные коды
+format:
+	autopep8 --in-place --recursive .
+
+# Проверки линтерами
+checkall:
+	ruff check
+	lizard
+
+# Сохранение старых отчётов
+saveolds:
+	if [ -f report-unittesting-latest.txt ]; then \
+		cp report-unittesting-latest.txt report-unittesting-old.txt; \
+	else \
+		echo "File report-unittesting-latest.txt does not exist"; \
+	fi
+	if [ -f report-functesting-latest.txt ]; then \
+		cp report-functesting-latest.txt report-functesting-old.txt; \
+	else \
+		echo "File report-functesting-latest.txt does not exist"; \
+	fi
