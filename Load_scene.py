@@ -1,4 +1,3 @@
-import tkinter as tk
 from tkinter import messagebox
 
 from Add_interface import submit, insert_delete_spinbox
@@ -46,19 +45,19 @@ def load_scene_file(Facade, table, scene_width_spinbox, scene_height_spinbox, fi
                         raise RuntimeError(f"Ошибка данных для объекта '{obj_type}'")
                     entry_arr = [width, height, length, offset_x, offset_y]
                 
-                elif obj_type == "дверь" and len(parts) == 9:
+                elif obj_type == "дверь" and len(parts) == 10:
                     try:
-                        color, width, height, length, offset_x, offset_y, width_hole, height_hole = parts[1], int(parts[2]), int(parts[3]), int(parts[4]), int(parts[5]), int(parts[6]), int(parts[7]), int(parts[8])
+                        color, width, height, length, offset_x, offset_y, width_hole, height_hole, side_hole = parts[1], int(parts[2]), int(parts[3]), int(parts[4]), int(parts[5]), int(parts[6]), int(parts[7]), int(parts[8]), int(parts[9])
                     except ValueError:
                         raise RuntimeError(f"Ошибка данных для объекта '{obj_type}'")
-                    entry_arr = [width, height, length, offset_x, offset_y, width_hole, height_hole]
+                    entry_arr = [width, height, length, offset_x, offset_y, width_hole, height_hole, side_hole]
                 
-                elif obj_type == "окно" and len(parts) == 10:
+                elif obj_type == "окно" and len(parts) == 11:
                     try:
-                        color, width, height, length, offset_x, offset_y, width_hole, height_hole, up_hole = parts[1], int(parts[2]), int(parts[3]), int(parts[4]), int(parts[5]), int(parts[6]), int(parts[7]), int(parts[8]), int(parts[9])
+                        color, width, height, length, offset_x, offset_y, width_hole, height_hole, side_hole, up_hole = parts[1], int(parts[2]), int(parts[3]), int(parts[4]), int(parts[5]), int(parts[6]), int(parts[7]), int(parts[8]), int(parts[9]), int(parts[10])
                     except ValueError:
                         raise RuntimeError(f"Ошибка данных для объекта '{obj_type}'")
-                    entry_arr = [width, height, length, offset_x, offset_y, width_hole, height_hole, up_hole]
+                    entry_arr = [width, height, length, offset_x, offset_y, width_hole, height_hole, side_hole, up_hole]
                 
                 else:
                     raise RuntimeError("Некорректные параметры объекта")

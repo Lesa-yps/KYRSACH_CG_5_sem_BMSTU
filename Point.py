@@ -1,6 +1,6 @@
 import tkinter.messagebox as mb
 
-DEF_MAX_Z = 1000
+DEF_MAX_Z = 10000
 
 class Point:
 
@@ -12,16 +12,16 @@ class Point:
         self.z = z
 
     def print_coords(self):
-        print("x = ", point.x)  # 1
-        print("y = ", point.y)  # 2
-        print("z = ", point.z)  # 3
+        print("x = ", self.x)  # 1
+        print("y = ", self.y)  # 2
+        print("z = ", self.z)  # 3
 
     # Простейшая ортографическая проекция для отображения 3D-координат на 2D-плоскость
     def project(self, MAX_Z = DEF_MAX_Z):
-        if (self.z <= -MAX_Z):
-            mb.showinfo("Внимнаие!", f"Координата по z <= -{MAX_Z}! Ортографическая проекция сломалась бы, поэтому z стал = -{MAX_Z - 1}.")
-            self.z = MAX_Z + 1
-        scale = MAX_Z / (MAX_Z + self.z)
+        # if (self.z <= -MAX_Z):
+        #     mb.showinfo("Внимнаие!", f"Координата по z <= -{MAX_Z}! Ортографическая проекция сломалась бы, поэтому z стал = -{MAX_Z - 1}.")
+        #     self.z = -MAX_Z + 1
+        scale = (MAX_Z + self.z) / MAX_Z
         self.x *= scale
         self.y *= scale
         return self

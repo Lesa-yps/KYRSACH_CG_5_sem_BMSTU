@@ -1,6 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, colorchooser
 
+from Objects import X_SIDE, Y_SIDE
+
+# идёт ли сейчас отрисовка
+from multiprocessing import Value
+is_painting = Value('b', False)  # Создание общей переменной типа bool
+
 # цвет объекта по-умолчанию синий
 plane_color = "#0000ff"
 
@@ -14,27 +20,30 @@ def insert_delete_spinbox(spinbox, x):
 # Функция, проверяющая корректность размеров и расположения дырки
 def check_sizes(entry_arr, obj_type):
     rc = False   # Флаг успешности проверки
-    for x in entry_arr[:3] + entry_arr[5:]:
+
+    pos_entry_arr = entry_arr[:3] + entry_arr[5:]
+    if obj_type == "окно" or obj_type == "дверь":
+        pos_entry_arr.pop(5)
+
+    for x in pos_entry_arr:
         if x <= 0:
             messagebox.showerror("Ошибка", "Неположительные размеры! Проверьте границы объекта.")
             rc = True
             return rc
 
-    width, height = entry_arr[0], entry_arr[1]
+    width, height, lenght = entry_arr[0], entry_arr[1], entry_arr[2]
 
-    if obj_type == "стена":
-        pass
+    if obj_type == "дверь" or obj_type == "окно":
 
-    elif obj_type == "дверь" or obj_type == "окно":
-        width_hole, height_hole = entry_arr[5], entry_arr[6]
-        # Проверка, чтобы отверстие не было шире или выше объекта
-        if width_hole >= width or height_hole >= height:
+        width_hole, height_hole, side_hole = entry_arr[5], entry_arr[6], entry_arr[7]
+        # Проверка, чтобы отверстие не было шире или выше объекта + что его положение корректно
+        if (side_hole == X_SIDE and width_hole >= width) or (side_hole == Y_SIDE and width_hole >= lenght) or height_hole >= height or (side_hole != X_SIDE and side_hole != Y_SIDE):
             rc = True
 
         elif obj_type == "окно":
-            up_hole = entry_arr[7]
-            # Проверка, чтобы окно не вылезло за верх объекта
-            if up_hole >= height or (up_hole + height_hole) >= height:
+            up_hole = entry_arr[8]
+            # Проверка, чтобы окно не вылезло за границы объекта
+            if up_hole + height_hole >= height or up_hole <= 0:
                 rc = True
 
     if rc:
@@ -42,13 +51,30 @@ def check_sizes(entry_arr, obj_type):
 
     return rc
 
+# поворот объекта на 90 градусов
+def rotate_object(obj_type, entry_arr):
+    width_spin, height_spin, length_spin, offset_x_spin, offset_y_spin = tuple(entry_arr[:5])
+    new_entry_arr = [length_spin, height_spin, width_spin, offset_x_spin, offset_y_spin]
+    if obj_type == "дверь" or obj_type == "окно":
+        width_hole, height_hole, side_hole = entry_arr[5], entry_arr[6], entry_arr[7]
+        new_entry_arr += [width_hole, height_hole, Y_SIDE - side_hole]
+        if obj_type == "окно":
+            up_hole = entry_arr[8]
+            new_entry_arr += [up_hole]
+    return new_entry_arr
+
+
 
 # Определяем функцию для и добавления объекта
-def submit(Facade, table, obj_type, color, entry_arr, dialog = None):
+def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog = None):
+    global is_painting
     # if dialog is not None:
         # color = plane_color
     # Флаг успешности проверок
     rc = True
+    # Если пользователь запросил поворот - поворачиваем
+    if is_rotate:
+        entry_arr = rotate_object(obj_type, entry_arr)
     # Проверка пересечений и размеров
     if not Facade.check_intersection(entry_arr[:5]) and not check_sizes(entry_arr, obj_type):
         # Добавляем объект
@@ -63,6 +89,7 @@ def submit(Facade, table, obj_type, color, entry_arr, dialog = None):
         if (dialog):
             messagebox.showinfo("Успех", f"Объект '{obj_type}' успешно добавлен!")
             dialog.destroy()  # Закрываем окно после добавления
+            is_painting.value = False
 
     else:
         rc = False
@@ -124,6 +151,21 @@ def add_object_dialog(Facade, table, obj_type, color = None, data_arr = None):
 
     # ОКНО или ДВЕРЬ
     if obj_type == "дверь" or obj_type == "окно":
+
+        # Переменная для хранения выбранного значения
+        if data_arr is not None:
+            side_hole_radbut = tk.StringVar(value=data_arr[7])
+        else:
+            side_hole_radbut = tk.StringVar(value=X_SIDE)  # значение по умолчанию
+
+        # Создаем радиокнопки
+        width_radio = tk.Radiobutton(dialog, text="Отверстие по ширине", variable=side_hole_radbut, value=X_SIDE, bg='light pink')
+        length_radio = tk.Radiobutton(dialog, text="Отверстие по длине", variable=side_hole_radbut, value=Y_SIDE, bg='light pink')
+
+        # Размещаем радиокнопки
+        width_radio.pack(anchor="w")
+        length_radio.pack(anchor="w")
+
         tk.Label(dialog, text="Ширина отверстия:", bg='light pink').pack()
         width_hole_spin = tk.Spinbox(dialog, from_=1, to=floor_num_squares[0], width=5)
         width_hole_spin.pack()
@@ -136,8 +178,8 @@ def add_object_dialog(Facade, table, obj_type, color = None, data_arr = None):
         if data_arr is not None:
             insert_delete_spinbox(height_hole_spin, data_arr[6])
 
-        SIZE_Y += 100
-        entry_arr += [width_hole_spin, height_hole_spin]
+        SIZE_Y += 145
+        entry_arr += [width_hole_spin, height_hole_spin, side_hole_radbut]
 
     # ОКНО
     if obj_type == "окно":
@@ -160,11 +202,32 @@ def add_object_dialog(Facade, table, obj_type, color = None, data_arr = None):
     button_color = tk.Button(dialog, text="Выбрать цвет", command=lambda: choose_color(), activebackground="salmon", width=20, height=1, bg=plane_color, font=("Calibry", 12), bd=7, cursor="hand1")
     button_color.pack()
 
+    # Переменная для хранения состояния галочки (0 - снята, 1 - установлена)
+    is_rotate = tk.BooleanVar(value=False)
+    # если это изменение объекта добавляем возможность поворота на 90 градусов
+    if data_arr is not None:
+        check_button = tk.Checkbutton(dialog, text="повернуть на 90 гр.", variable=is_rotate, bg='light pink', font=("Calibry", 12))
+        check_button.pack()
+        SIZE_Y += 40
+
+    if data_arr is not None:
+        res_button_text = "Изменить объект"
+    else:
+        res_button_text = "Добавить объект"
+
     # Кнопка для подтверждения
-    tk.Button(dialog, text="Добавить объект", command=lambda: submit(Facade, table, obj_type, plane_color, [int(i.get()) for i in entry_arr], dialog), width=20, height=1, bd=7, font=("Calibry", 12), activebackground="salmon", bg="khaki", cursor="hand1").pack()
+    tk.Button(dialog, text=res_button_text, command=lambda: submit(Facade, table, obj_type, plane_color, [int(i.get()) for i in entry_arr], is_rotate.get(), dialog), width=20, height=1, bd=7, font=("Calibry", 12), activebackground="salmon", bg="khaki", cursor="hand1").pack()
 
     # Устанавливаем фиксированный размер окна
     dialog.geometry(f"{SIZE_X}x{SIZE_Y}")
     dialog.resizable(False, False)  # Запрещаем изменение размера окна
+
+    # Определяем функцию для закрытия окна, которая установит is_painting в False
+    def on_close():
+        is_painting.value = False
+        dialog.destroy()
+
+    # Привязываем on_close к событию закрытия окна
+    dialog.protocol("WM_DELETE_WINDOW", on_close)
 
     dialog.mainloop()

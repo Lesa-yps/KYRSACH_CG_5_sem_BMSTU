@@ -6,12 +6,11 @@ import tkinter as tk
 from tkinter import colorchooser
 import tkinter.messagebox as mb
 from tkinter import ttk
-from typing import List, Optional, Tuple
+from typing import Optional
 
-from Add_interface import add_object_dialog, insert_delete_spinbox
+from Add_interface import add_object_dialog, insert_delete_spinbox, is_painting
 from Load_scene import load_scene_file
 from Del_change_object import delete_object_tree, change_object_tree
-from Camera_work import rotate_camera
 from Scene import Scene
 
 MAX_SCENE_SIZE = 1000
@@ -23,21 +22,13 @@ MIN_WIDTH = 1300  # минимальная ширина окна приложе�
 MIN_HEIGHT = 910  # минимальная высота окна приложения
 SIZE_OF_CANVAS = 500  # размер холста
 STEP_CONST = 50  # шаг перемещения
-# Переменные определяющие расположение/состояние окна
-ZOOM = 1  # масштаб
-SIDE_PLACE = 0  # переменная для определения сдвига в стороне
-HEIGHT_PLACE = 0  # переменная для определения сдвига по высоте
-
 color_scene = "#cccccc"  # цвет сцены по-умолчанию серый
-is_painting = False  # идёт ли сейчас отрисовка
 num_choose_object = 0  # номер выбранного объекта в выпадающем списке (стена / дверь / окно)
-count_draw = 0 # номер отрисовки? (чтоб настроить сцену)
 
 
 # сброс всего наработанного
 
 def cleaning() -> None:
-    global ZOOM, SIDE_PLACE, HEIGHT_PLACE, count_draw
     # Очистка всего содержимого на холсте
     cnv.delete("all")
     # Масштабирование холста до его стартового размера
@@ -46,7 +37,6 @@ def cleaning() -> None:
     ds = 0
     cnv.xview_moveto(ds)
     cnv.yview_moveto(ds)
-    ZOOM, SIDE_PLACE, HEIGHT_PLACE = 1, ds, ds
     # Очистка всех строк в таблице
     for item in tree.get_children():
         tree.delete(item)
@@ -56,22 +46,18 @@ def cleaning() -> None:
     x, y = Facade.take_floor_num_squares()
     insert_delete_spinbox(scene_width, x)
     insert_delete_spinbox(scene_height, y)
-    count_draw = 1
 
 
 # Функция вызывается в ответ на действия пользователя и выполняет требуемое или вызывает для этого другую функцию
 
 def fork(text: str) -> None:
-    global is_painting, count_draw
-    if is_painting:
+    global is_painting
+    if is_painting.value:
         mb.showerror('Ошибка!', "Дождитесь конца отрисовки!")
         return
-    is_painting = True
-    count_draw += 1
-    if count_draw == 2:
-        Facade.create_floor(int(scene_width.get()), int(scene_height.get()), color_scene)
-    if text in ['X+', 'X-', 'Y+', 'Y-', 'Z+', 'Z-']:
-        rotate_camera(Facade, text)
+    is_painting.value = True
+    if text in ['X', 'Y', 'Z']:
+        Facade.rotate_camera(text, float(angle_camera_rotate.get()))
     elif text == 'Добавить объект':
         add_object_dialog(Facade, tree, chooser_object_combobox.get())
     elif text == 'Изменить объект':
@@ -85,16 +71,16 @@ def fork(text: str) -> None:
     elif text == 'Удалить объект':
         delete_object_tree(Facade, tree)
     elif text == 'Загрузить сцену':
-        fork('Очистить холст')
+        cleaning()
         rc = load_scene_file(Facade, tree, scene_width, scene_height, file_path_entry.get())
         if not rc:
-            fork('Очистить холст')
+            cleaning()
     elif text == 'Выгрузить сцену':
         Facade.upload_scene(file_path_entry.get())
     # вращения камеры
     elif text == 'Очистить холст':
         cleaning()
-    is_painting = False
+    is_painting.value = False
 
 
 # обработка события изменения размера окна
@@ -247,20 +233,19 @@ color_display.grid(row=0, column=1, padx=5)
 camera_rotate_frame = tk.Frame(window, bg="lightpink", highlightbackground="PaleVioletRed", highlightcolor="IndianRed", highlightthickness=7)
 camera_rotate_frame.grid(row=2, column=0, padx=5, pady=10)
 tk.Label(camera_rotate_frame, text="Вращать камеру:", font=("Calibry", 12), bg="lightpink").grid(
-    row=0, column=0, columnspan=8, sticky="w")
+    row=0, column=0, columnspan=6, sticky="w")
+tk.Label(camera_rotate_frame, text="Угол (в град.):", font=("Calibry", 12), bg="lightpink").grid(
+    row=1, column=0, sticky="w")
+angle_camera_rotate = tk.Spinbox(camera_rotate_frame, from_=-360, to=360, width=5)
+angle_camera_rotate.grid(row=1, column=1, stick='we', pady=2)
+tk.Label(camera_rotate_frame, text="Ось вращения:", font=("Calibry", 12), bg="lightpink").grid(
+    row=1, column=2, sticky="w")
 # вращение по х
-make_button('X+', camera_rotate_frame, 2).grid(row=1, column=0, stick='we')
-make_button('X-', camera_rotate_frame, 2).grid(row=1, column=1, stick='we')
-# Разделитель между X и Y
-tk.Frame(camera_rotate_frame, width=20, bg="lightpink").grid(row=1, column=2, pady=2)
+make_button('X', camera_rotate_frame, 2).grid(row=1, column=3, stick='we')
 # вращение по y
-make_button('Y+', camera_rotate_frame, 2).grid(row=1, column=3, stick='we')
-make_button('Y-', camera_rotate_frame, 2).grid(row=1, column=4, stick='we')
-# Разделитель между Y и Z
-tk.Frame(camera_rotate_frame, width=20, bg="lightpink").grid(row=1, column=5, pady=2)
+make_button('Y', camera_rotate_frame, 2).grid(row=1, column=4, stick='we')
 # вращение по z
-make_button('Z+', camera_rotate_frame, 2).grid(row=1, column=6, stick='we')
-make_button('Z-', camera_rotate_frame, 2).grid(row=1, column=7, stick='we')
+make_button('Z', camera_rotate_frame, 2).grid(row=1, column=5, stick='we')
 
 
 # ЗАГРУЗКА И СОХРАНЕНИЕ СЦЕНЫ
@@ -295,16 +280,14 @@ tk.Label(window, text="Талышева Олеся ИУ7-55Б", bg='light pink',
 # Функции для приближения и удаления
 
 def zoom_in(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global ZOOM
-        ZOOM *= 1.1
+    if not is_painting.value:
+        Facade.multy_zoom(1.1)
         cnv.scale("all", 0, 0, 1.1, 1.1)
         Facade.redraw_scene()
 
 def zoom_out(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global ZOOM
-        ZOOM *= 0.9
+    if not is_painting.value:
+        Facade.multy_zoom(0.9)
         cnv.scale("all", 0, 0, 0.9, 0.9)
         Facade.redraw_scene()
 
@@ -313,37 +296,33 @@ def zoom_out(event: Optional[tk.Event] = None) -> None:
 # Функция для перемещения влево
 
 def move_left(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global SIDE_PLACE
-        SIDE_PLACE += 1
-        cnv.xview_scroll(round(-1 * ZOOM), "units")
+    if not is_painting.value:
+        Facade.add_side_place(-STEP_CONST)
+        cnv.xview_scroll(round(-1 * Facade.ZOOM), "units")
         Facade.redraw_scene()
 
 # Функция для перемещения вправо
 
 def move_right(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global SIDE_PLACE
-        SIDE_PLACE -= 1
-        cnv.xview_scroll(round(1 * ZOOM), "units")
+    if not is_painting.value:
+        Facade.add_side_place(STEP_CONST)
+        cnv.xview_scroll(round(1 * Facade.ZOOM), "units")
         Facade.redraw_scene()
 
 # Функция для перемещения вверх
 
 def move_up(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global HEIGHT_PLACE
-        HEIGHT_PLACE -= 1
-        cnv.yview_scroll(round(-1 * ZOOM), "units")
+    if not is_painting.value:
+        Facade.add_height_place(STEP_CONST)
+        cnv.yview_scroll(round(1 * Facade.ZOOM), "units")
         Facade.redraw_scene()
 
 # Функция для перемещения вниз
 
 def move_down(event: Optional[tk.Event] = None) -> None:
-    if not is_painting:
-        global HEIGHT_PLACE
-        HEIGHT_PLACE += 1
-        cnv.yview_scroll(round(1 * ZOOM), "units")
+    if not is_painting.value:
+        Facade.add_height_place(-STEP_CONST)
+        cnv.yview_scroll(round(-1 * Facade.ZOOM), "units")
         Facade.redraw_scene()
 
 
