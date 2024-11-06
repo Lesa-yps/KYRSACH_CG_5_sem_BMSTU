@@ -1,0 +1,84 @@
+% Пакеты и настройки
+
+\setlength{\parindent}{1.25cm} % Установка абзацного отступа в 1.25 см
+
+% Пакеты для поддержки кириллицы
+\usepackage[utf8]{inputenc}    % Кодировка UTF-8
+\usepackage{cmap} % Улучшенный поиск русских слов в полученном pdf-файле
+\usepackage[T2A]{fontenc} % Поддержка русских букв
+\usepackage[english,russian]{babel} % Русский и английский языки
+\usepackage{mathptmx}          % Используем шрифт Times New Roman вместо Computer Modern
+
+\usepackage{fancyhdr} % Для настройки колонтитулов (опционально)
+
+\usepackage{amsmath,amsfonts,amssymb} % Математические символы
+\usepackage{graphicx}          % Для вставки изображений
+\usepackage{geometry}          % Настройка полей
+\usepackage{float}             % Фиксация местоположения таблиц и рисунков
+\usepackage{hyperref}          % Ссылки
+\usepackage{titlesec}          % Для оформления заголовков разделов
+\usepackage{xcolor}			  % Цвета
+
+\usepackage{pdfpages} % Для включения пдф-ников
+
+% Отключаем добавление библиографии и содержания в оглавление
+\usepackage[notbib,nottoc]{tocbibind}
+
+
+\usepackage{longtable} % Для длинных таблиц, если нужно
+\usepackage{array}     % Для улучшенного контроля над таблицами
+\usepackage{makecell} % Пакет для работы с многострочными ячейками
+
+\usepackage{setspace} % Для междустрочных интервалов
+\onehalfspacing % Полуторный интервал
+
+\usepackage{hyperref} % Пакет для гиперссылок (в источниках)
+
+% Настройка полей
+\geometry{
+    left=30mm,
+    right=15mm,
+    top=20mm,
+    bottom=20mm
+}
+
+% Настройка стиля заголовков
+\titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{1em}{}
+
+\usepackage{caption} % Для настройки подписей
+\captionsetup[figure]{justification=centering} % Центрирование подписей к рисункам
+% Изменяем текст "Рис." на "Рисунок"
+\addto\captionsrussian{\renewcommand{\figurename}{Рисунок}}
+% Настраиваем разделитель с ":" на " -"
+\captionsetup[figure]{labelsep=endash} % Используем длинное тире для разделителя
+
+% Настройка внешнего вида подписей таблиц
+\captionsetup[table]{justification=centering, labelsep=endash} % Центрируем и используем тире вместо двоеточия
+
+% Для кода
+\usepackage{listings}
+% Настройка стиля для кода
+\lstset{
+    language=Python,            % Язык кода
+    basicstyle=\ttfamily\footnotesize,  % Базовый стиль текста и размер шрифта
+    backgroundcolor=\color{gray!10},    % Цвет фона
+    frame=single,              % Рамка вокруг листинга
+    breaklines=true,           % Переносить строки
+    captionpos=b,              % Позиция заголовка (caption) снизу
+    tabsize=4,                 % Размер табуляции
+    commentstyle=\color{gray}, % Стиль комментариев
+    keywordstyle=\color{blue}, % Стиль ключевых слов
+    stringstyle=\color{red},   % Стиль строк
+    showstringspaces=false,    % Не отображать пробелы в строках
+    numbers=left, % Нумерация строк слева
+    numberstyle=\tiny\color{gray}, % Стиль нумерации строк
+    stepnumber=1, % Шаг нумерации строк
+    numbersep=5pt, % Расстояние между нумерацией и текстом
+    breaklines=true, % Перенос длинных строк
+    aboveskip=1em, % Расстояние выше листинга
+    belowskip=1em, % Расстояние ниже листинга
+}
+
+% Изменяем разделитель в подписях
+\captionsetup[lstlisting]{labelsep=endash} % Используем длинное тире

@@ -1,0 +1,33 @@
+\documentclass[a4paper,12pt]{article}
+
+% Подключения пакетов и настройки
+\include{00-includes}
+
+
+\begin{document}
+
+% Титульный лист
+\includepdf[pages=-]{title.pdf}
+% Техническое задание
+\includepdf[pages=-]{TT.pdf}
+% Оглавление
+\include{02-contents}
+% Введение
+\include{03-intro}
+
+% Основная часть
+% Аналитическая часть
+\include{10-analitic}
+% Конструкторская часть
+%\include{11-consrtact}
+% Технологическая часть
+%\include{12-technologic}
+% Исследовательская часть
+%\include{13-research}
+% Заключение
+%\include{14-conclusion}
+
+% Список используемых источников
+\include{20-sources}
+
+\end{document}

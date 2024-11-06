@@ -1,0 +1,9 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{Введение}{3}{Doc-Start}%
+\contentsline {section}{\numberline {1}Аналитическая часть}{6}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Удаление невидимых линий}{6}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Введение}{6}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Алгоритмы предварительного удаления невидимых линий и поверхностей}{10}{subsubsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.2}Алгоритмы отрисовки теней}{10}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Алгоритмы освещения}{10}{subsection.1.3}%
+\contentsline {section}{Список использованных источников}{11}{subsection.1.3}%
