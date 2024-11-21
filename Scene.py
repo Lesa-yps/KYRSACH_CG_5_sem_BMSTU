@@ -165,7 +165,7 @@ class Scene:
         floor_planes, center_point = self.create_floor_coords()
         list_planes += floor_planes
         # print(f"size of list_planes matrix = {len(list_planes)}")
-        params_Z_buffer = (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), list_planes, center_point
+        #params_Z_buffer = (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), list_planes, center_point
         # расчет matrix и matrix_light параллельно
         with ProcessPoolExecutor() as executor:
             # алгоритм z буфера для рисования плоскостей

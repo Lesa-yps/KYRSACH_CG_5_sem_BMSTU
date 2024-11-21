@@ -80,5 +80,14 @@
     belowskip=1em, % Расстояние ниже листинга
 }
 
+% Для доп-уровня заголовка
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4} % Устанавливаем уровень нумерации
+\setcounter{tocdepth}{4} % Устанавливаем уровень в оглавлении
+\titleformat{\paragraph}[block]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+
+\usepackage[table,xcdraw]{xcolor}  % Подключение пакета для цветов
+
 % Изменяем разделитель в подписях
 \captionsetup[lstlisting]{labelsep=endash} % Используем длинное тире

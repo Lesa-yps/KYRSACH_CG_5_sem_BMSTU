@@ -426,9 +426,10 @@ def key_press(event: tk.Event) -> None:
 cnv.bind("<MouseWheel>", scroll)
 window.bind("<KeyPress>", key_press)
 
-# Начальная конфигурация
-Facade = Scene(cnv)
-fork("Очистить холст")
+if __name__ == '__main__':
+    # Начальная конфигурация
+    Facade = Scene(cnv)
+    fork("Очистить холст")
 
-# Включается обработчик событий
-window.mainloop()
+    # Включается обработчик событий
+    window.mainloop()
