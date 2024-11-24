@@ -1,0 +1,32 @@
+digraph "packages_kyrsach" {
+rankdir=BT
+charset="utf-8"
+"KYRSACH_CG_5_sem_BMSTU" [color="black", label=<KYRSACH_CG_5_sem_BMSTU>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Add_interface" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Add_interface>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Change_color" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Change_color>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Del_change_object" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Del_change_object>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Load_scene" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Load_scene>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Matrix" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Matrix>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Objects" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Objects>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Point" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Point>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Scene>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Z_buffer_algo" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.Z_buffer_algo>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.main" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.main>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.test_Objects" [color="black", label=<KYRSACH_CG_5_sem_BMSTU.test_Objects>, shape="box", style="solid"];
+"KYRSACH_CG_5_sem_BMSTU.Add_interface" -> "KYRSACH_CG_5_sem_BMSTU.Objects" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Del_change_object" -> "KYRSACH_CG_5_sem_BMSTU.Add_interface" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Load_scene" -> "KYRSACH_CG_5_sem_BMSTU.Add_interface" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Matrix" -> "KYRSACH_CG_5_sem_BMSTU.Point" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Objects" -> "KYRSACH_CG_5_sem_BMSTU.Point" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" -> "KYRSACH_CG_5_sem_BMSTU.Change_color" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" -> "KYRSACH_CG_5_sem_BMSTU.Matrix" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" -> "KYRSACH_CG_5_sem_BMSTU.Objects" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" -> "KYRSACH_CG_5_sem_BMSTU.Point" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Scene" -> "KYRSACH_CG_5_sem_BMSTU.Z_buffer_algo" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.Z_buffer_algo" -> "KYRSACH_CG_5_sem_BMSTU.Point" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.main" -> "KYRSACH_CG_5_sem_BMSTU.Add_interface" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.main" -> "KYRSACH_CG_5_sem_BMSTU.Del_change_object" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.main" -> "KYRSACH_CG_5_sem_BMSTU.Load_scene" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.main" -> "KYRSACH_CG_5_sem_BMSTU.Scene" [arrowhead="open", arrowtail="none"];
+"KYRSACH_CG_5_sem_BMSTU.test_Objects" -> "KYRSACH_CG_5_sem_BMSTU.Objects" [arrowhead="open", arrowtail="none"];
+}

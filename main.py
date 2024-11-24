@@ -29,6 +29,13 @@ num_choose_object = 0  # номер выбранного объекта в вы�
 # сброс всего наработанного
 
 def cleaning() -> None:
+    # сброс всего наработанного без стартовой отрисовки сцены
+    cleaning_not_draw_floor()
+    # Отрисовываем сцену
+    Facade.draw_scene()
+
+# сброс всего наработанного без стартовой отрисовки сцены
+def cleaning_not_draw_floor() -> None:
     # Очистка всего содержимого на холсте
     cnv.delete("all")
     # Масштабирование холста до его стартового размера
@@ -41,7 +48,7 @@ def cleaning() -> None:
     for item in tree.get_children():
         tree.delete(item)
     # Возвращаем сцену в стартовое состояние
-    Facade.start_scene()
+    Facade.start_scene_not_redraw()
     # Устанавливаем размеры сцены в Spinbox
     x, y = Facade.take_floor_num_squares()
     insert_delete_spinbox(scene_width, x)
@@ -71,7 +78,7 @@ def fork(text: str) -> None:
     elif text == 'Удалить объект':
         delete_object_tree(Facade, tree)
     elif text == 'Загрузить сцену':
-        cleaning()
+        cleaning_not_draw_floor()
         rc = load_scene_file(Facade, tree, scene_width, scene_height, file_path_entry.get())
         if not rc:
             cleaning()

@@ -1,4 +1,3 @@
-
 from Point import Point
 
 # алгоритм реализующий Z-буфер
@@ -55,17 +54,15 @@ def add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file):
     dz = Zb - Za
     dmax = max(abs(dx), abs(dz))
     add_point_to_Z_matrix(matrix_pixels, point1, color, log_file)
-    if (dmax != 0):
+    if (abs(dmax) < 0.001):
         # шаг изменения по коодинатам
         dx /= dmax
         dz /= dmax
         xi, zi = Xa, Za
-        i = 0
-        while (i < dmax):
+        while (abs(xi - Xa) <= dmax and abs(zi - Za) <= dmax):
             xi += dx
             zi += dz
             add_point_to_Z_matrix(matrix_pixels, Point(xi, Y, zi), color, log_file)
-            i += 1
     return matrix_pixels
 
 
@@ -73,20 +70,23 @@ def add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file):
 def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
     # сортируем точки по высоте (у)
     C, B, A = tuple(sorted(list(triangle), key=lambda point: point.y))
-    # log_file.write(f"   triangle: {(A.coords(), B.coords(), C.coords())}\n")
+    #log_file.write(f"   triangle: {(A.coords(), B.coords(), C.coords())}\n")
     y_min, y_max = C.y, A.y
 
-    dy_AC = C.y - A.y
-    dx_AC = (C.x - A.x) / abs(dy_AC) if dy_AC != 0 else 0
-    dz_AC = (C.z - A.z) / abs(dy_AC) if dy_AC != 0 else 0
+    # вычисляем приращения (dx, dy, dz) вдоль сторон треугольника
+    def compute_deltas(p1, p2):
+        dy = p2.y - p1.y
+        # eps для предотвращения деления на 0
+        if abs(dy) > 1e-4:  
+            dx = (p2.x - p1.x) / abs(dy)
+            dz = (p2.z - p1.z) / abs(dy)
+            return dx, dy, dz
+        # Если dy почти 0, приращений нет
+        return 0, 0, 0  
 
-    dy_AB = B.y - A.y
-    dx_AB = (B.x - A.x) / abs(dy_AB) if dy_AB != 0 else 0
-    dz_AB = (B.z - A.z) / abs(dy_AB) if dy_AB != 0 else 0
-
-    dy_BC = C.y - B.y
-    dx_BC = (C.x - B.x) / abs(dy_BC) if dy_BC != 0 else 0
-    dz_BC = (C.z - B.z) / abs(dy_BC) if dy_BC != 0 else 0
+    dx_AC, dy_AC, dz_AC = compute_deltas(A, C)
+    dx_AB, dy_AB, dz_AB = compute_deltas(A, B)
+    dx_BC, dy_BC, dz_BC = compute_deltas(B, C)
 
     # log_file.write(f"   AC = {(dx_AC, -1, dz_AC)}, AB = {(dx_AB, -1, dz_AB)}, BC = {(dx_BC, -1, dz_BC)}\n")
 
@@ -100,6 +100,7 @@ def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
     while point1.y >= y_min:
         # обработка строки от point1 до point2
         matrix_pixels = add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file)
+        #log_file.write(f"        ROW: {point1.coords()} to {point2.coords()}\n")
 
         if point2.y < B.y:
             point2.add(dx_BC, -1, dz_BC)
@@ -111,35 +112,70 @@ def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
 
 
 # преобразования точек
-def transform_plane_points(plane, offsets, dimensions, transform_matrix, center_point, scale_coef, size_square, max_z, log_file):
+def transform_plane_point(point1, offsets, dimensions, center_point, scale_coef, size_square, max_z, transform_matrix):
     # распаковка входных данных
     (dx_screen, dy_screen) = offsets
     (width_screen, height_screen) = dimensions
-    point1, point2, point3, point4, color = plane
     # преобразуем координаты плоскости из "квадратовых" в мировые
-    point1.multy(size_square).add(-dx_screen, -dy_screen, 0), point2.multy(size_square).add(-dx_screen, -dy_screen, 0)
-    point3.multy(size_square).add(-dx_screen, -dy_screen, 0), point4.multy(size_square).add(-dx_screen, -dy_screen, 0)
+    point1.multy(size_square).add(-dx_screen, -dy_screen, 0)
+    #print("T", point1.coords())
     # разворачиваем у
-    point1.y, point2.y, point3.y, point4.y = - point1.y, - point2.y, - point3.y, - point4.y
+    point1.y = - point1.y
+    #print("T", point1.coords())
     # сдвиг в центр
     dx, dy, dz = center_point.coords()
-    # print(dx, dy, dz)
-    point1.add(-dx, -dy, -dz), point2.add(-dx, -dy, -dz), point3.add(-dx, -dy, -dz), point4.add(-dx, -dy, -dz)
     # добавляем поворот камеры и масштаб
-    # log_file.write(f"\n   points before matrix: {(point1.coords(), point2.coords(), point3.coords(), point4.coords())}\n")
-    point1, point2, point3, point4 = transform_matrix.transform_point(point1, scale_coef), transform_matrix.transform_point(point2, scale_coef),\
-        transform_matrix.transform_point(point3, scale_coef), transform_matrix.transform_point(point4, scale_coef)
-    point1.add(dx, dy, dz), point2.add(dx, dy, dz), point3.add(dx, dy, dz), point4.add(dx, dy, dz)
-    # log_file.write(f"   points after matrix: {(point1.coords(), point2.coords(), point3.coords(), point4.coords())}\n")
+    point1.add(-dx, -dy, -dz)
+    point1 = transform_matrix.transform_point(point1, scale_coef)
+    point1.add(dx, dy, dz)
+    #print("T", point1.coords())
     # опускаем у
-    point1.y, point2.y, point3.y, point4.y = height_screen - 3 + point1.y, height_screen - 3 + point2.y, height_screen - 3 + point3.y, height_screen - 3 + point4.y
+    point1.y += height_screen - 3
+    #print("T", point1.coords())
     # преобразование координат с помощью ортогональной проекции
-    point1, point2, point3, point4 = point1.project(max_z), point2.project(max_z), point3.project(max_z), point4.project(max_z)
+    point1 = point1.project(max_z)
+    #print("T", point1.coords())
+    return point1
+
+# обратные преобразования точек
+def anti_transform_plane_point(point1, offsets, dimensions, center_point, scale_coef, size_square, max_z, transform_matrix):
+    # распаковка входных данных
+    (dx_screen, dy_screen) = offsets
+    (width_screen, height_screen) = dimensions
+    # преобразование координат с помощью анти-ортогональной проекции
+    point1 = point1.anti_project(max_z)
+    #print("A", point1.coords())
+    # поднимаем у
+    point1.y -= height_screen - 3
+    #print("A", point1.coords())
+    # сдвиг в центр
+    dx, dy, dz = center_point.coords()
+    #  отнимаем камеры и масштаб
+    point1.add(-dx, -dy, -dz)
+    point1 = transform_matrix.anti_transform_point(point1, scale_coef)
+    point1.add(dx, dy, dz)
+    #print("A", point1.coords())
+    # разворачиваем у
+    point1.y = - point1.y
+    #print("A", point1.coords())
+    # преобразуем координаты плоскости из "квадратовых" в мировые
+    point1.add(dx_screen, dy_screen, 0).multy(1/size_square)
+    #print("A", point1.coords())
+    return point1
+
+
+# преобразования точек
+def transform_plane_points(plane, params, transform_matrix):
+    point1, point2, point3, point4, color = plane
+    point1 = transform_plane_point(point1, *params, transform_matrix)
+    point2 = transform_plane_point(point2, *params, transform_matrix)
+    point3 = transform_plane_point(point3, *params, transform_matrix)
+    point4 = transform_plane_point(point4, *params, transform_matrix)
     return point1, point2, point3, point4, color
 
 
 # Алгоритм Z-буфера для списка плоскостей
-def Z_buffer_algo(offsets, dimensions, list_planes, transform_matrix, center_point, scale_coef, size_square, max_z, log_filename):
+def Z_buffer_algo(list_planes, offsets, dimensions, center_point, scale_coef, size_square, max_z, transform_matrix, log_filename):
 
     log_file = open(log_filename, "w")
 
@@ -156,15 +192,18 @@ def Z_buffer_algo(offsets, dimensions, list_planes, transform_matrix, center_poi
 
     # сам алгоритм:
     # проходимся по всем плоскостям
-    i = 0
-    for plane in list_planes:
+    for i in range(len(list_planes)):
         # преобразования точек
-        point1, point2, point3, point4, color = transform_plane_points(plane, offsets, dimensions, transform_matrix, center_point, scale_coef, size_square, max_z, log_file)
+        params = (offsets, dimensions, center_point, scale_coef, size_square, max_z)
+        list_planes[i] = transform_plane_points(list_planes[i], params, transform_matrix)
+        
+    for plane in list_planes:
+        point1, point2, point3, point4, color = plane
         # разделим каждую квадрат-плоскость на 2 треугольника для упрощения
         triangle_1 = (point1, point2, point3)
         triangle_2 = (point3, point4, point1)
         # Запись треугольников в лог-файл
-        # log_file.write(f"\ni = {i}\nPoints: {(point1.coords(), point2.coords(), point3.coords(), point4.coords())}\n")
+        #log_file.write(f"\ni = {i}\nPoints: {(point1.coords(), point2.coords(), point3.coords(), point4.coords())}\n")
         # Добавляем в Z-буфер треугольники
         matrix_pixels = add_triangle_to_Z_matrix(matrix_pixels, triangle_1, color, log_file)
         matrix_pixels = add_triangle_to_Z_matrix(matrix_pixels, triangle_2, color, log_file)
@@ -174,28 +213,6 @@ def Z_buffer_algo(offsets, dimensions, list_planes, transform_matrix, center_poi
         draw_border_line(matrix_pixels, point3, point4, log_file)
         draw_border_line(matrix_pixels, point4, point1, log_file)
 
-        i += 1
-
     log_file.close()
-
-    # # Матрица для перемещения в центр координат
-    # to_center = np.array([[1, 0, 0, 0],
-    #                       [0, 1, 0, 0],
-    #                       [0, 0, 1, 0],
-    #                       [-X_CENTER, -Y_CENTER, -PLATE_Z - 5, 1]])
-
-    # # Матрица для возвращения в исходные координаты
-    # back_to_start = np.array([[1, 0, 0, 0],
-    #                            [0, 1, 0, 0],
-    #                            [0, 0, 1, 0],
-    #                            [X_CENTER, Y_CENTER, PLATE_Z + 5, 1]])
-
-    # # Итоговая матрица трансформации для точек
-    # dot_trans_mat = np.dot(to_center, np.dot(trans_mat, back_to_start))
-    
-    # # Создание матриц для источника света
-    # illum_dot_matrices = [np.dot(to_center, np.dot(scene.get_illuminant(i).get_trans_mat(), back_to_start))
-    #                       for i in range(scene.get_illum_num())]
-
 
     return matrix_pixels

@@ -35,7 +35,7 @@ class Matrix:
         return res_matrix
         
     # функция поворачивает график
-    def rotate_axis(self, axis: str, angle_degree: int) -> None:
+    def rotate_axis(self, axis: str, angle_degree: int):
         angle = angle_degree * pi / 180
         if axis == "X":
             rotating_matrix = [[1,           0,          0, 0],
@@ -55,10 +55,10 @@ class Matrix:
         # print(axis[0], rotating_matrix, sin(angle), cos(angle), angle)
         self.matrix = self.multy_matrix(self.matrix, rotating_matrix)
         # self.print_matrix()
+        return self
 
     # умножаем точку-массив на матрицу для трансформации
     def transform_point(self, point: Point, scale_coef: float = 1) -> Point:
-        # point.print_coords()
         arr_point = list(point.coords())  + [1]
         res_arr_point = list()
         for i in range(MATRIX_SIZE):
@@ -67,7 +67,20 @@ class Matrix:
                 summ += arr_point[j] * self.matrix[j][i]
             res_arr_point.append(summ * scale_coef)
         res_point = Point(res_arr_point[0], res_arr_point[1], res_arr_point[2])
-        # res_point.print_coords()
+        return res_point
+    
+    # умножаем точку-массив на обратную матрицу для трансформации
+    def anti_transform_point(self, point: Point, scale_coef: float = 1) -> Point:
+        # point.print_coords()
+        arr_point = [i / scale_coef for i in point.coords()]  + [1]
+        res_arr_point = list()
+        inv_matrix = self.get_inverse_matrix()
+        for i in range(MATRIX_SIZE):
+            summ = 0
+            for j in range(MATRIX_SIZE):
+                summ += arr_point[j] * inv_matrix[j][i]
+            res_arr_point.append(summ)
+        res_point = Point(res_arr_point[0], res_arr_point[1], res_arr_point[2])
         return res_point
     
     # вывод матрицы

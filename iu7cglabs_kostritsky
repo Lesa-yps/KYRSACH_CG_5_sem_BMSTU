@@ -36,7 +36,7 @@ report-unittesting-latest.txt:
 # Проведение функционального тестирования и формирование отчёта
 report-functesting-latest.txt:
 	mkdir results 2>/dev/null || true
-	coverage run --source=Floating_horizon -m pytest testFunc.py > /dev/null 2>&1 > $@
+	coverage run --source=Z_buffer_algo -m pytest testFunc.py > /dev/null 2>&1 > $@
 	coverage report -m | awk 'NR==3{sub("%", "", $$4); printf "%.2f\n", $$4/100}' > $@
 	coverage report -m >> $@
 	rm .coverage

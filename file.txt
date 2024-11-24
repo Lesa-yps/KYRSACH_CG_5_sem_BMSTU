@@ -1,0 +1,1 @@
+taskset -c 0-14 python3 main.py

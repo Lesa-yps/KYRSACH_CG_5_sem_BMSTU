@@ -6,7 +6,7 @@ import numpy as np
 
 from Objects import Objects
 from Point import Point, DEF_MAX_Z
-from Z_buffer_algo import Z_buffer_algo, COLOR_PART, Z_PART
+from Z_buffer_algo import Z_buffer_algo, COLOR_PART, Z_PART, anti_transform_plane_point, transform_plane_point
 from Matrix import Matrix
 from Change_color import darken_color
 
@@ -44,6 +44,11 @@ class Scene:
 
     # отрисовывает начальную сцену (зачищая все объекты) с полом DEF_COUNT_SQARES x DEF_COUNT_SQARES
     def start_scene(self):
+        self.start_scene_not_redraw()
+        self.draw_scene()
+    
+    # возвращает сцену в начальное состояние (зачищая все объекты) с полом DEF_COUNT_SQARES x DEF_COUNT_SQARES
+    def start_scene_not_redraw(self):
         self.objects.clear()
         # координаты источника света по х, y и z
         self.light = (0, 0, DEF_MAX_Z)
@@ -58,7 +63,7 @@ class Scene:
         # возвращаем матрицу преобразований в стартовое состояние
         self.transform_matrix.make_one()
         self.transform_matrix_light.make_one()
-        self.redraw_scene()
+        self.canvas.delete("all")
 
     # Задаёт новые количество клеточек и цвет "пола" и высчитывает координаты всех его клеточек
     def create_floor(self, num_squares_x = DEF_COUNT_SQARES, num_squares_y = DEF_COUNT_SQARES, scene_color = "#cccccc"):
@@ -97,17 +102,16 @@ class Scene:
         return (width, height)
 
     # преобразуем координаты x, y, z из вида наблюдателя в координаты из вида источника света
-    def transform_to_light_view(self, x, y, z):
-        point = np.array([x, y, z, 1])
+    def transform_to_light_view(self, point, params):
         # преобразуем точку из системы координат наблюдателя в мировую систему координат
-        point_world = np.dot(self.transform_matrix.get_inverse_matrix(), point)
+        point_world = anti_transform_plane_point(point, *params, self.transform_matrix)
+        #print(f"    point_world {point_world}")
         # преобразуем точку из мировой системы координат в систему координат источника света
-        point_light = np.dot(self.transform_matrix_light.matrix, point_world)
-        x_light, y_light, z_light = [float(i) for i in point_light[:3]]
-        return x_light, y_light, z_light
+        point_light = transform_plane_point(point_world, *params, self.transform_matrix_light)
+        return point_light.coords()
 
     # наложение матрицы теней на основную матрицу
-    def combo_matrix(self, matrix, matrix_light):
+    def combo_matrix(self, matrix, matrix_light, params):
         # проходимся по всей матрице наблюдателя
         for y in range(len(matrix)):
             for x in range(len(matrix[0])):
@@ -116,17 +120,21 @@ class Scene:
                 if z == float("-inf"):
                     continue
                 # координаты точки x, y, z из вида наблюдателя линейно преобразуются в координаты x', y', z' на виде из источника света
-                x_light, y_light, z_light = self.transform_to_light_view(x, y, z)
+                x_light, y_light, z_light = self.transform_to_light_view(Point(x, y, z), params)
+                print((x, y, z), (x_light, y_light, z_light), self.transform_matrix.matrix, self.transform_matrix_light.matrix)
                 # oкругляем x и y для индексации
                 x_light, y_light = int(x_light), int(y_light)
                 # проверяем границы
                 if 0 <= y_light < len(matrix_light) and 0 <= x_light < len(matrix_light[0]):
-                    z_light = matrix_light[y_light][x_light][Z_PART]
+                    z_light_matrix = matrix_light[y_light][x_light][Z_PART]
+                    print("     ", z_light_matrix, ">", z_light)
                     # проверка на нахождение в тени (глубина в наблюдателе больше глубины из источника + EPS)
-                    if z > z_light + EPS:
+                    if z_light + EPS < z_light_matrix and (z_light_matrix != float("-inf")):
                         # затеняем пиксель
                         matrix[y][x] = (matrix[y][x][Z_PART], darken_color(matrix[y][x][COLOR_PART], 0.8))
-                        # print(".", end = "")
+                        print("тень", (x, y, z), z_light_matrix)
+                        #if (z_light_matrix == float("-inf")):
+                        #    print(".", end = "")
         return matrix
     
     # отрисовка готовой матрицы с подсчетом закрашенных клеток и времени работы
@@ -153,32 +161,43 @@ class Scene:
     # получение списка плоскостей с цветами
     def calc_list_planes(self):
         return self.objects.calc_list_planes()
-        
+    
+    # вычисляет матрицу пикселей (Z-буфер) для экрана
+    def calc_pixel_matrix(self, params_Z_buffer, is_parallel = True):
+        if is_parallel:
+            # расчет matrix и matrix_light параллельно
+            with ProcessPoolExecutor() as executor:
+                # алгоритм z буфера для рисования плоскостей
+                future_matrix = executor.submit(Z_buffer_algo, *params_Z_buffer, self.transform_matrix, "log_file_Z.txt")
+                # алгоритм Z буффера для добавления теней
+                future_matrix_light = executor.submit(Z_buffer_algo, *params_Z_buffer,  self.transform_matrix_light, "log_file_Z_light.txt")
+                # получение результатов из будущих объектов
+                matrix = future_matrix.result()
+                matrix_light = future_matrix_light.result()
+        else:
+            # алгоритм z буфера для рисования плоскостей
+            matrix = Z_buffer_algo(*params_Z_buffer, self.transform_matrix, "log_file_Z.txt")
+            # алгоритм Z буффера для добавления теней
+            matrix_light = Z_buffer_algo(*params_Z_buffer,  self.transform_matrix_light, "log_file_Z_light.txt")
+        # наложение матрицы теней на основную матрицу
+        matrix = self.combo_matrix(matrix, matrix_light, params_Z_buffer[1:])
+        return matrix
 
-    # Зарисовка всех объектов сцены
-    def draw_scene(self):
+    # зарисовка всех объектов сцены
+    def draw_scene(self, is_draw = True, is_parallel = True):
+        #print('     draw_scene!')
         (width, height) = self.calc_coords_screen()
-        # print((self.ZOOM, self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height))
         # получение списка плоскостей с цветами
         list_planes = self.calc_list_planes()
         # добавляем плоскости к полу
         floor_planes, center_point = self.create_floor_coords()
         list_planes += floor_planes
-        # print(f"size of list_planes matrix = {len(list_planes)}")
-        #params_Z_buffer = (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), list_planes, center_point
-        # расчет matrix и matrix_light параллельно
-        with ProcessPoolExecutor() as executor:
-            # алгоритм z буфера для рисования плоскостей
-            future_matrix = executor.submit(Z_buffer_algo, (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), list_planes, self.transform_matrix, center_point, self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z, "log_file_Z.txt")
-            # алгоритм Z буффера для добавления теней
-            future_matrix_light = executor.submit(Z_buffer_algo, (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), list_planes, self.transform_matrix_light, center_point, self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z,  "log_file_Z_light.txt")
-            # получение результатов из будущих объектов
-            matrix = future_matrix.result()
-            matrix_light = future_matrix_light.result()
-        # наложение матрицы теней на основную матрицу
-        matrix = self.combo_matrix(matrix, matrix_light)
+        params_Z_buffer = (list_planes, (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), center_point, self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z)
+        # вычисляет матрицу пикселей (Z-буфер) для экрана
+        matrix = self.calc_pixel_matrix(params_Z_buffer, is_parallel)
         # отрисовка готовой матрицы (время работы выводится в командную строку)
-        self.draw_matrix(matrix, self.SIDE_PLACE, self.HEIGHT_PLACE)
+        if is_draw:
+            self.draw_matrix(matrix, self.SIDE_PLACE, self.HEIGHT_PLACE)
 
     # перерисовка всех объектов сцены
     def redraw_scene(self):
@@ -217,14 +236,15 @@ class Scene:
         self.redraw_scene()
 
     # Добавляем объект
-    def add_object(self, type, params):
+    def add_object(self, type, params, is_redraw = True):
         if type == "стена":
             self.objects.add_wall(params)
         elif type == "дверь":
             self.objects.add_door(params)
         elif type == "окно":
             self.objects.add_window(params)
-        self.redraw_scene()
+        if is_redraw:
+            self.redraw_scene()
 
     # Получаем все данные объекта по частичным данным из таблицы (получаем словарь object_data_all["type"], object_data_all["color"], object_data_all["sizes"])
     def take_data_object(self, new_item_data):

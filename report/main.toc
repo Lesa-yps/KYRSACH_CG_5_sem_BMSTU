@@ -25,6 +25,7 @@
 \contentsline {subsubsection}{\numberline {1.5.2}Затенение по Гуро}{41}{subsubsection.1.5.2}%
 \contentsline {subsubsection}{\numberline {1.5.3}Затенение по Фонгу}{42}{subsubsection.1.5.3}%
 \contentsline {subsubsection}{\numberline {1.5.4}Выводы}{43}{subsubsection.1.5.4}%
+\contentsline {subsection}{\numberline {1.6}Выводы}{43}{subsection.1.6}%
 \contentsline {section}{\numberline {2}Конструкторская часть}{44}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Требования к программному обеспечению}{44}{subsection.2.1}%
 \contentsline {subsubsection}{\numberline {2.1.1}Функциональные требования}{44}{subsubsection.2.1.1}%
@@ -33,6 +34,17 @@
 \contentsline {subsection}{\numberline {2.2}Общий алгоритм решения поставленной задачи}{45}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Алгоритм Z-буфера удаления невидимых линий}{46}{subsection.2.3}%
 \contentsline {subsection}{\numberline {2.4}Алгоритм Z-буфера с отрисовкой теней}{48}{subsection.2.4}%
-\contentsline {subsection}{\numberline {2.5}Представление объектов в программном обеспечении}{49}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.5}Представление объектов в программном обеспечении}{50}{subsection.2.5}%
 \contentsline {subsection}{\numberline {2.6}Выводы}{50}{subsection.2.6}%
-\contentsline {section}{Список использованных источников}{51}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Технологическая часть}{51}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Выбор средств реализации ПО}{51}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Структура программы}{52}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Классы и их роли}{52}{subsubsection.3.2.1}%
+\contentsline {paragraph}{\numberline {3.2.1.1}Пространственные элементы}{52}{paragraph.3.2.1.1}%
+\contentsline {paragraph}{\numberline {3.2.1.2}Работа с геометрическими преобразованиями}{52}{paragraph.3.2.1.2}%
+\contentsline {paragraph}{\numberline {3.2.1.3}Управление коллекцией объектов}{54}{paragraph.3.2.1.3}%
+\contentsline {paragraph}{\numberline {3.2.1.4}Управление сценой}{54}{paragraph.3.2.1.4}%
+\contentsline {subsubsection}{\numberline {3.2.2}Логика работы программы}{55}{subsubsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.3}Выбор средств реализации ПО}{55}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Выводы}{57}{subsection.3.4}%
+\contentsline {section}{Список использованных источников}{58}{subsection.3.4}%

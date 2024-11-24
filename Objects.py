@@ -49,7 +49,7 @@ class Wall:
         # нижняя плоскость
         arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
         # слева
-        arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x0, y0, z1), Point(x1, y0, z1), self.color)]
+        arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y0, z1), Point(x0, y0, z1), self.color)]
         # спереди
         arr_planes += [(Point(x1, y0, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x1, y0, z1), self.color)]
         # справа

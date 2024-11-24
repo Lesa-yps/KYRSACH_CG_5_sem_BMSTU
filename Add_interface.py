@@ -68,8 +68,6 @@ def rotate_object(obj_type, entry_arr):
 # Определяем функцию для и добавления объекта
 def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog = None):
     global is_painting
-    # if dialog is not None:
-        # color = plane_color
     # Флаг успешности проверок
     rc = True
     # Если пользователь запросил поворот - поворачиваем
@@ -78,7 +76,7 @@ def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog 
     # Проверка пересечений и размеров
     if not Facade.check_intersection(entry_arr[:5]) and not check_sizes(entry_arr, obj_type):
         # Добавляем объект
-        Facade.add_object(obj_type, tuple([color] + entry_arr))
+        Facade.add_object(obj_type, tuple([color] + entry_arr), is_redraw = (dialog is not None))
 
         # Добавляем строку в таблицу
         new_data = (obj_type, entry_arr[3], entry_arr[4], entry_arr[0], entry_arr[1], entry_arr[2])

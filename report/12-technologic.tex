@@ -1,197 +1,187 @@
 \section{Технологическая часть}
-\subsection{Требования к программному обеспечению}
+\subsection{Выбор средств реализации ПО}
 
 \hspace{1.25cm}
-На вход программе подаются 2 строки из символов, которые входят в таблицу Юникода (UTF-8).
+Для разработки программы выбран язык программирования Python. Данный выбор обусловлен следующими причинами:
 
-На выход программа выдаёт число – расстояние между строками, вычисленное алгоритмом Левенштейна или Дамерау-Левенштейна матричной или рекурсивной реализацией. Для матричных реализаций также выводится матрица расстояний. Также в зависимости от выбранного пункта меню программа замеряет время работы алгоритмов и рисует получившиеся графики.
+\begin{enumerate}
+    \item \underline{Богатая экосистема инструментов и библиотек}\\ 
+    Python поддерживает необходимые для проекта библиотеки, такие как:
+    \begin{itemize}
+        \item \textbf{Tkinter} для создания графического пользовательского интерфейса (GUI).
+        \item \textbf{NumPy} для выполнения математических операций, включая преобразования координат и вычисления.
+        \item \textbf{math} для работы с математическими функциями.
+        \item \textbf{ProcessPoolExecutor} из модуля \textbf{concurrent.futures} для организации мультипроцессинга.
+        \item \textbf{pytest} для написания модульных тестов, что помогает автоматизировать проверку функционала программы и выявлять ошибки.
+    \end{itemize}
 
-\subsection{Средства реализации}
+    \item \underline{Использование наработок из курса <<Компьютерная графика>>}\\ 
+    Python и Tkinter уже применялись в лабораторных работах по курсу <<Компьютерная графика>>, где была отработана инфраструктура для создания приложений. Это позволило заимствовать проверенные решения, такие как:
+    \begin{itemize}
+        \item Интерфейсные элементы и их взаимодействие.
+        \item Фрагменты кода для работы с объектами сцены.
+        \item Систему тестирования и сборки, что ускорило разработку и снизило риск ошибок.
+    \end{itemize}
+    
+    \item \underline{Поддержка объектно-ориентированного программирования (ООП)}\\ 
+    Python предоставляет удобные механизмы для работы с ООП, что позволило разделить программу на независимые модули и классы (например, объекты сцены, камера, управление интерфейсом).
 
-\hspace{1.25cm}
-Python эффективно обработывает строки, поэтому программа была реализована на этом языке программирования. Для замеров времени была использована функция \texttt{process\_time()} из библиотеки \texttt{time}, вычисляющая процессорное время \cite{process_time}.
+    \item \underline{Платформенная независимость}\\ 
+    Программы на Python работают на различных операционных системах (Windows, macOS, Linux), что делает приложение доступным для широкого круга пользователей.
 
-\subsection{Реализации алгоритмов}
-
-\hspace{1.25cm}
-Ниже приведены реализации алгоритмов поиска расстояния Левенштейна (листинги \ref{lst:levenshtein_matrix}, \ref{lst:levenshtein_recursive} и \ref{lst:levenshtein_recursive_matrix}) и Дамерау-Левенштейна (листинги \ref{lst:damerau_levenshtein_matrix}, \ref{lst:damerau_levenshtein_recursive} и \ref{lst:damerau_levenstein_recursive_matrix}) матричным, рекурсивным и рекурсивно-матричным способами на Python.
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация матричного алгоритма Левенштейна, label=lst:levenshtein_matrix]
-def algo_Levenstein_matrix(str1: str, str2: str) -> int:
-    len1, len2 = len(str1) + 1, len(str2) + 1
-    if len2 > len1:
-        str1, str2 = str2, str1
-        len1, len2 = len2, len1
-    old_str = [i for i in range(len2)]
-    cur_str = [0 for _ in range(len2)]
-    for i in range(1, len1):
-        cur_str[0] = i
-        for j in range(1, len2):
-            cur_str[j] = min(cur_str[j - 1] + 1,
-                            old_str[j] + 1,
-                            old_str[j - 1] + (str1[i - 1] != str2[j - 1]))
-        old_str = cur_str.copy()
-    return cur_str[-1]
-\end{lstlisting}
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация рекурсивного алгоритма Левенштейна, label=lst:levenshtein_recursive]
-def algo_Levenstein_recursion(str1: str, str2: str) -> int:
-    len1, len2 = len(str1), len(str2)
-    if len1 * len2 == 0:
-        return abs(len2 - len1)
-    return min(algo_Levenstein_recursion(str1, str2[:-1]) + 1,
-                algo_Levenstein_recursion(str1[:-1], str2) + 1,
-                algo_Levenstein_recursion(str1[:-1], str2[:-1]) + (str1[-1] != str2[-1]))
-\end{lstlisting}
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация рекурсивно-матричного алгоритма Левенштейна, label=lst:levenshtein_recursive_matrix]
-def algo_Levenstein_recursion_matrix(str1: str, str2: str) -> int:
-    len1, len2 = len(str1) + 1, len(str2) + 1
-    mat = [[float("-inf") for i in range(len2)] for j in range(len1)]
-    # the recursive part itself
-    def recursion_part(str1: str, str2: str, mat: List[float] = []) -> int:
-        len1, len2 = len(str1), len(str2)
-        if mat[len1][len2] > float("-inf"):
-            pass
-        elif len1 * len2 == 0:
-            mat[len1][len2] = abs(len2 - len1)
-        else:
-            mat[len1][len2] = min(recursion_part(str1, str2[:-1], mat) + 1,
-                    recursion_part(str1[:-1], str2, mat) + 1,
-                    recursion_part(str1[:-1], str2[:-1], mat) + (str1[-1] != str2[-1]))
-        return mat[len1][len2]
-    return recursion_part(str1, str2, mat)
-\end{lstlisting}
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация матричного алгоритма Дамерау-Левенштейна, label=lst:damerau_levenshtein_matrix]
-def algo_Damerau_Levenstein_matrix(str1: str, str2: str) -> int:
-    len1, len2 = len(str1) + 1, len(str2) + 1
-    if len2 > len1:
-        str1, str2 = str2, str1
-        len1, len2 = len2, len1
-    old_str = [i for i in range(len2)]
-    cur_str = [0 for _ in range(len2)]
-    for i in range(1, len1):
-        cur_str[0] = i
-        for j in range(1, len2):
-            m = str1[i - 1] != str2[j - 1]
-            cur_str[j] = min(cur_str[j - 1] + 1,
-                            old_str[j] + 1,
-                            old_str[j - 1] + m)
-            if (i > 1) and (j > 1) and m and (str1[i - 2] == str2[j - 1]) and (str1[i - 1] == str2[j - 2]):
-                cur_str[j] = min(cur_str[j], old_str[j - 1])
-        old_str = cur_str.copy()
-    return cur_str[-1]
-\end{lstlisting}
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация рекурсивного алгоритма Дамерау-Левенштейна, label=lst:damerau_levenshtein_recursive]
-def algo_Damerau_Levenstein_recursion(str1: str, str2: str) -> int:
-    len1, len2 = len(str1), len(str2)
-    if len1 * len2 == 0:
-        return abs(len2 - len1)
-    res = min(algo_Damerau_Levenstein_recursion(str1, str2[:-1]) + 1,
-                algo_Damerau_Levenstein_recursion(str1[:-1], str2) + 1,
-                algo_Damerau_Levenstein_recursion(str1[:-1], str2[:-1]) + (str1[-1] != str2[-1]))
-    if ((len(str1) >= 2) and (len(str2) >= 2) and (str1[-1] == str2[-2]) and (str1[-2] == str2[-1])):
-        res = min(res, algo_Damerau_Levenstein_recursion(str1[:-2], str2[:-2]) + 1)
-    return res
-\end{lstlisting}
-
-\vspace{0.25cm}
-\begin{lstlisting}[caption=реализация рекурсивно-матричного алгоритма Дамерау-Левенштейна, label=lst:damerau_levenstein_recursive_matrix]
-def algo_Damerau_Levenshtein_recursion_matrix(str1: str, str2: str) -> int:
-    len1, len2 = len(str1) + 1, len(str2) + 1
-    mat = [[float("inf") for i in range(len2)] for j in range(len1)]
-    # the recursive part itself
-    def recursion_part(str1: str, str2: str, mat: List[float] = []) -> int:
-        len1, len2 = len(str1), len(str2)
-        if mat[len1][len2] < float("inf"):
-            pass
-        elif len1 * len2 == 0:
-            mat[len1][len2] = abs(len2 - len1)
-        else:
-            mat[len1][len2] = min(recursion_part(str1, str2[:-1], mat) + 1,
-                    recursion_part(str1[:-1], str2, mat) + 1,
-                    recursion_part(str1[:-1], str2[:-1], mat) + (str1[-1] != str2[-1]))
-            if ((len(str1) >= 2) and (len(str2) >= 2) and (str1[-1] == str2[-2]) and (str1[-2] == str2[-1])):
-                mat[len1][len2] = min(mat[len1][len2], recursion_part(str1[:-2], str2[:-2], mat) + 1)
-        return mat[len1][len2]
-    return recursion_part(str1, str2, mat)
-\end{lstlisting}
+    \item \underline{Простота и читаемость кода}\\
+    Python отличается лаконичным синтаксисом и высокой читаемостью кода, что ускоряет процесс разработки и тестирования программы. Это особенно важно для курсового проекта, где требуется не только реализовать функционал, но и ясно представить код и структуру программы.
+\end{enumerate}
 
 
-\vspace{0.25cm}
-\subsection{Тесты}
+
+\subsection{Структура программы}
 
 \hspace{1.25cm}
-Для тестирования алгоритмов Левенштейна и Дамерау-Левенштейна были составлены таблицы с входными данными (2 строки, возможно, пустые - $\lambda$), ожидаемым результатом (расстоянием) и полученным результатом от всех трёх способов.
+Программа представляет собой объектно-ориентированную архитектуру, предназначенную для работы с элементами сцены и пространственными объектами, такими как стены, двери и окна. Взаимодействие между классами организовано вокруг обработки и отображения трёхмерной модели помещения. Структура классов разработанного программного обеспечения представлена на рисунке~\ref{fig:class_UML}.
 
-\vspace{0.25cm}
-\begin{table}[H]
+\begin{figure}[h!]
     \centering
-    \begin{tabular}{|c|c|c|c|c|c|}
-        \hline
-        \textbf{Строка 1} & \textbf{Строка 2} & \textbf{Ожидание} & \textbf{матричный} & \textbf{рекурсивный} & \makecell{\textbf{рекурсивно-}\\\textbf{матричный}} \\
-        \hline
-        $\lambda$ & $\lambda$ & 0 & 0 & 0 & 0 \\
-        a  & a  & 0 & 0 & 0 & 0 \\
-        abc & abc & 0 & 0 & 0 & 0 \\
-        $\lambda$  & a  & 1 & 1 & 1 & 1 \\
-        a  & $\lambda$  & 1 & 1 & 1 & 1 \\
-        a  & b  & 1 & 1 & 1 & 1 \\
-        abc & abs & 1 & 1 & 1 & 1 \\
-        odc & abc & 2 & 2 & 2 & 2 \\
-        ods & abc & 3 & 3 & 3 & 3 \\
-        abcs & abc & 1 & 1 & 1 & 1 \\
-        bc & abc & 1 & 1 & 1 & 1 \\
-        bac & abc & 2 & 2 & 2 & 2 \\
-        \hline
-    \end{tabular}
-    \caption{Таблица тестов для алгоритмов Левенштейна}
-\end{table}
+    \includegraphics[width=1\textwidth]{img/class_UML.png}
+    \caption{Структура классов разработанного программного обеспечения.}
+    \label{fig:class_UML}
+\end{figure}
 
-\begin{table}[H]
+\subsubsection{Классы и их роли}
+
+\hspace{1.25cm}
+Основные классы и их функции можно разбить на несколько ключевых компонентов.
+
+\paragraph{Пространственные элементы}
+\hspace{1.25cm}
+Эти классы представляют объекты сцены (стены, двери, окна) и содержат свойства, необходимые для их описания, а также методы для вычисления их геометрии.
+\begin{itemize}
+    \item \textbf{Wall}:
+    \begin{itemize}
+        \item Хранит такие параметры, как цвет, длина, высота, ширина и смещение.
+        \item Методы:
+        \begin{itemize}
+            \item \verb|calc_list_planes()|: вычисляет геометрические плоскости объекта.
+            \item \verb|is_equals(data)|: проверяет эквивалентность с другим объектом.
+            \item \verb|upload_data(file)|: загружает параметры объекта из файла.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Door} (наследует \textit{Wall}):
+    \begin{itemize}
+        \item Добавляет дополнительные свойства, такие как высота, ширина и сторона, где расположено отверстие.
+    \end{itemize}
+    \item \textbf{Window} (наследует \textit{Wall}):
+    \begin{itemize}
+        \item Включает параметр \verb|up_hole|, связанный с высотой окна.
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Работа с геометрическими преобразованиями}
+\begin{itemize}
+    \item \textbf{Matrix}:
+    \begin{itemize}
+        \item Хранит матрицы преобразований и предоставляет инструменты для выполнения операций с ними.
+        \item Методы:
+        \begin{itemize}
+            \item \verb|get_inverse_matrix()|: получение обратной матрицы.
+            \item \verb|mult_matrix()|: умножение двух матриц.
+            \item \verb|rotate_axis()|: поворот объектов вокруг оси.
+            \item \verb|transform_point()|: трансформация координат точки.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Point}:
+    \begin{itemize}
+        \item Представляет точку в пространстве с координатами $(x, y, z)$.
+        \item Методы:
+        \begin{itemize}
+            \item \verb|add(dx, dy, dz)|: добавляет смещение к точке.
+            \item \verb|multiply(num)|: умножает координаты на заданное число.
+            \item \verb|project(MAX_Z)|: выполняет проекцию точки на плоскость.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Управление коллекцией объектов}
+\textbf{Objects}:
+\begin{itemize}
+    \item Хранит списки объектов сцены (двери, стены, окна).
+    \item Методы:
+    \begin{itemize}
+        \item \verb|add_door(params)|, \verb|add_wall(params)|, \verb|add_window(params)|: добавление объектов.
+        \item \verb|calc_list_planes()|: вычисление плоскостей для всех объектов.
+        \item \verb|clear()|: очистка списка объектов.
+        \item \verb|check_intersection(entry_arr)|: проверка пересечений между объектами.
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Управление сценой}
+\textbf{Scene}:
+\begin{itemize}
+    \item Основной класс для управления сценой и её параметрами.
+    \item Свойства:
+    \begin{itemize}
+        \item Константы, такие как размеры сцены (\verb|HEIGHT_PLACE|, \verb|SIDE_PLACE|).
+        \item Цвет пола, параметры света, матрица трансформации и объекты сцены.
+    \end{itemize}
+    \item Методы:
+    \begin{itemize}
+        \item \verb|add_object(type, params)|: добавление нового объекта в сцену.
+        \item \verb|rotate_camera(text, angle)|: вращение камеры.
+        \item \verb|draw_scene()|: отрисовка сцены.
+        \item \verb|check_intersection(entry_arr)|: проверка пересечений объектов сцены.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Логика работы программы}
+\begin{enumerate}
+    \item \textbf{Инициализация сцены}\\
+    Создаётся объект \textit{Scene}, в который добавляются стены, двери и окна через методы \verb|add_object| или \verb|add_wall|.
+    \item \textbf{Работа с геометрией}\\
+    Методы классов \textit{Wall}, \textit{Door} и \textit{Window} используются для вычисления параметров объектов, а класс \textit{Matrix} помогает выполнять геометрические преобразования.
+    \item \textbf{Проверка пересечений}\\
+    Программа может проверять пересечения между объектами сцены с помощью метода \verb|check_intersection|.
+    \item \textbf{Отрисовка}\\
+    Класс \textit{Scene} отвечает за создание визуализации сцены с использованием геометрических данных.
+\end{enumerate}
+
+
+
+\subsection{Выбор средств реализации ПО}
+
+\begin{figure}[H]
     \centering
-    \begin{tabular}{|c|c|c|c|c|c|}
-        \hline
-        \textbf{Строка 1} & \textbf{Строка 2} & \textbf{Ожидание} & \textbf{матричный} & \textbf{рекурсивный} & \makecell{\textbf{рекурсивно-}\\\textbf{матричный}} \\
-        \hline
-        $\lambda$ & $\lambda$ & 0 & 0 & 0 & 0 \\
-        a  & a  & 0 & 0 & 0 & 0 \\
-        abc & abc & 0 & 0 & 0 & 0 \\
-        $\lambda$  & a  & 1 & 1 & 1 & 1 \\
-        a  & $\lambda$  & 1 & 1 & 1 & 1 \\
-        a  & b  & 1 & 1 & 1 & 1 \\
-        abc & abs & 1 & 1 & 1 & 1 \\
-        odc & abc & 2 & 2 & 2 & 2 \\
-        ods & abc & 3 & 3 & 3 & 3 \\
-        abcs & abc & 1 & 1 & 1 & 1 \\
-        bc & abc & 1 & 1 & 1 & 1 \\
-        bac & abc & 1 & 1 & 1 & 1 \\
-        \hline
-    \end{tabular}
-    \caption{Таблица тестов для алгоритмов Дамерау-Левенштейна}
-\end{table}
+    \includegraphics[width=1\textwidth]{img/main_interface.png}
+    \caption{Интерфейс главного окна программного обеспечения.}
+    \label{fig:main_interface}
+\end{figure}
 
-В ходе проведённого тестирования (с помощью pytest) ошибок в алгоритмах не выявлено:
+Программное обеспечение предлагает интуитивно понятный графический интерфейс для работы с 3D-сценами. Основной экран разделён на несколько функциональных областей, каждая из которых отвечает за выполнение конкретных задач (см. рисунок~\ref{fig:main_interface}).
 
-\vspace{0.25cm}
-\begin{lstlisting}[caption=тестирование алгоритмов с помощью pytest]
-pytest
-======================== test session starts ========================
-platform win32 -- Python 3.11.9, pytest-8.2.2, pluggy-1.5.0
-rootdir: L:\sem_5\\Algorithm_analysis\lab_01
-plugins: Faker-28.4.1
-collected 72 items                                                                                                                                                                
+В верхней части интерфейса находится блок для добавления объектов. Пользователь может выбрать тип объекта из выпадающего списка, например, "Окно" или "Стена" , после чего нажать кнопку "Добавить объект", чтобы добавить его в сцену (см. рисунок~\ref{fig:add_interface}). Все добавленные объекты отображаются в таблице в центральной части окна, где указаны их основные параметры: тип, координаты, размеры и глубина.
 
-test_algo.py .....................................             [100%]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/add_interface.png}
+    \caption{Интерфейс добавления объектов программы (а - стена, б - дверь, в - окно.}
+    \label{fig:add_interface}
+\end{figure}
 
-======================== 72 passed in 0.69s =========================
-\end{lstlisting}
+Для изменения параметров уже существующих объектов предусмотрены кнопки "Изменить объект" и "Удалить объект". Это позволяет либо обновить свойства выбранного объекта, либо удалить его из сцены.
+
+Кроме того, пользователь может настроить параметры сцены, задав её размер через соответствующие поля ввода и изменив цвет с помощью кнопки "Выбрать цвет сцены". Управление камерой также доступно — можно задать угол вращения вокруг выбранной оси (X, Y или Z).
+
+Для сохранения или загрузки сцен предусмотрен функционал работы с файлами. Пользователь может указать путь к файлу и воспользоваться кнопками "Загрузить сцену" или "Выгрузить сцену", чтобы сохранить текущую сцену или восстановить её из файла. Также имеются кнопки для перемещения камеры вверх, вниз, влево или вправо, а также для изменения масштаба (увеличение или уменьшение).
+
+При добавлении новых объектов, таких как окна или стены, открывается отдельное окно диалога. Например, при добавлении окна пользователь может указать его размеры, положение в сцене и параметры отверстия (ширина, высота и подъём). Есть возможность выбрать цвет объекта и, подтвердив настройки, добавить его в сцену. Для стен доступны аналогичные параметры, но без настройки отверстий.
+
+Таким образом, интерфейс приложения предоставляет полный набор инструментов для создания и управления 3D-сценами, сохраняя удобство использования благодаря логично организованной структуре и понятным элементам управления.
+
+
+
+\subsection{Выводы}
+
+\hspace{1.25cm}
+В данном разделе обоснован выбор языка программирования и инструментов, использованных для реализации проекта, проведён анализ структуры программы, включая назначение и взаимодействие её основных классов. Также было подробно рассмотрено устройство пользовательского интерфейса, включая функциональные возможности и элементы управления приложением.
+
 
 \newpage

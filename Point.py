@@ -1,4 +1,4 @@
-import tkinter.messagebox as mb
+#import tkinter.messagebox as mb
 
 DEF_MAX_Z = 10000
 
@@ -26,6 +26,13 @@ class Point:
         self.y *= scale
         return self
     
+    # Простейшая ортографическая проекция для отображения 3D-координат на 2D-плоскость (обратная)
+    def anti_project(self, MAX_Z = DEF_MAX_Z):
+        scale = (MAX_Z + self.z) / MAX_Z
+        self.x /= scale
+        self.y /= scale
+        return self
+    
     def coords(self):
         return (self.x, self.y, self.z)
     
@@ -44,8 +51,12 @@ class Point:
         self.z += dz
         return self
     
-    def is_same(self, point1):
-        return self.x == point1.x and self.y == point1.y and self.z == point1.z
+    def is_same(self, point1, eps=1e-6):
+        return (
+            abs(self.x - point1.x) < eps and
+            abs(self.y - point1.y) < eps and
+            abs(self.z - point1.z) < eps
+        )
 
 
 # Пример использования класса Point
