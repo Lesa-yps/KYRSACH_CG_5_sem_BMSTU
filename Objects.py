@@ -85,33 +85,13 @@ class Door(Wall):
     def calc_list_planes(self):
         arr_planes = list()
         x0, y0, z0, x1, y1, z1 = self.offset_x, self.offset_y, 0, self.offset_x + self.width, self.offset_y + self.length, self.height
+        z11 = z0 + self.height_hole
         if (self.side_hole == X_SIDE):
             width_wall_near_hole = (self.width - self.width_hole) // 2
-            z11, y01, y11 = z0 + self.height_hole, y0 + width_wall_near_hole, y1 - width_wall_near_hole
-            # нижняя плоскость
-            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y01, z0), Point(x0, y01, z0), self.color)]
-            arr_planes += [(Point(x0, y11, z0), Point(x1, y11, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
-            # слева
-            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y0, z1), Point(x0, y0, z1), self.color)]
-            # спереди
-            arr_planes += [(Point(x1, y0, z0), Point(x1, y01, z0), Point(x1, y01, z1), Point(x1, y0, z1), self.color)]
-            arr_planes += [(Point(x1, y11, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x1, y11, z1), self.color)]
-            arr_planes += [(Point(x1, y01, z11), Point(x1, y11, z11), Point(x1, y11, z1), Point(x1, y01, z1), self.color)]
-            # справа
-            arr_planes += [(Point(x0, y1, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
-            # сзади
-            arr_planes += [(Point(x0, y0, z0), Point(x0, y01, z0), Point(x0, y01, z1), Point(x0, y0, z1), self.color)]
-            arr_planes += [(Point(x0, y11, z0), Point(x0, y1, z0), Point(x0, y1, z1), Point(x0, y11, z1), self.color)]
-            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x0, y11, z1), Point(x0, y01, z1), self.color)]
-            # сверху
-            arr_planes += [(Point(x0, y0, z1), Point(x1, y0, z1), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
-            # внутри (двери)
-            arr_planes += [(Point(x0, y01, z0), Point(x1, y01, z0), Point(x1, y01, z11), Point(x0, y01, z11), self.color)]
-            arr_planes += [(Point(x0, y11, z0), Point(x1, y11, z0), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
-            arr_planes += [(Point(x0, y01, z11), Point(x1, y01, z11), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
-        elif self.side_hole == Y_SIDE:
-            lenght_wall_near_hole = (self.length - self.width_hole) // 2
-            z11, x01, x11 = z0 + self.height_hole, x0 + lenght_wall_near_hole, x1 - lenght_wall_near_hole
+            if width_wall_near_hole == 0: width_wall_near_hole = 1
+            x01 = x0 + width_wall_near_hole
+            x11 = x01 + self.width_hole
+            if x11 == x1: x11 -= 1
             # нижняя плоскость
             arr_planes += [(Point(x0, y0, z0), Point(x01, y0, z0), Point(x01, y1, z0), Point(x0, y1, z0), self.color)]
             arr_planes += [(Point(x11, y0, z0), Point(x1, y0, z0), Point(x1, y1, z0), Point(x11, y1, z0), self.color)]
@@ -133,6 +113,33 @@ class Door(Wall):
             arr_planes += [(Point(x01, y0, z0), Point(x01, y1, z0), Point(x01, y1, z11), Point(x01, y0, z11), self.color)]
             arr_planes += [(Point(x11, y0, z0), Point(x11, y1, z0), Point(x11, y1, z11), Point(x11, y0, z11), self.color)]
             arr_planes += [(Point(x01, y0, z11), Point(x11, y0, z11), Point(x11, y1, z11), Point(x01, y1, z11), self.color)]
+        elif self.side_hole == Y_SIDE:
+            lenght_wall_near_hole = (self.length - self.width_hole) // 2
+            if lenght_wall_near_hole == 0: lenght_wall_near_hole = 1
+            y01 = y0 + lenght_wall_near_hole
+            y11 = y01 + self.width_hole
+            if y11 == y1: y11 -= 1
+            # нижняя плоскость
+            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y01, z0), Point(x0, y01, z0), self.color)]
+            arr_planes += [(Point(x0, y11, z0), Point(x1, y11, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
+            # слева
+            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y0, z1), Point(x0, y0, z1), self.color)]
+            # спереди
+            arr_planes += [(Point(x1, y0, z0), Point(x1, y01, z0), Point(x1, y01, z1), Point(x1, y0, z1), self.color)]
+            arr_planes += [(Point(x1, y11, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x1, y11, z1), self.color)]
+            arr_planes += [(Point(x1, y01, z11), Point(x1, y11, z11), Point(x1, y11, z1), Point(x1, y01, z1), self.color)]
+            # справа
+            arr_planes += [(Point(x0, y1, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
+            # сзади
+            arr_planes += [(Point(x0, y0, z0), Point(x0, y01, z0), Point(x0, y01, z1), Point(x0, y0, z1), self.color)]
+            arr_planes += [(Point(x0, y11, z0), Point(x0, y1, z0), Point(x0, y1, z1), Point(x0, y11, z1), self.color)]
+            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x0, y11, z1), Point(x0, y01, z1), self.color)]
+            # сверху
+            arr_planes += [(Point(x0, y0, z1), Point(x1, y0, z1), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
+            # внутри (двери)
+            arr_planes += [(Point(x0, y01, z0), Point(x1, y01, z0), Point(x1, y01, z11), Point(x0, y01, z11), self.color)]
+            arr_planes += [(Point(x0, y11, z0), Point(x1, y11, z0), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
+            arr_planes += [(Point(x0, y01, z11), Point(x1, y01, z11), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
         return arr_planes
 
 
@@ -162,33 +169,10 @@ class Window(Door):
         z11, z01 = z1 - height_wall_near_hole, z0 + height_wall_near_hole
         if (self.side_hole == X_SIDE):
             width_wall_near_hole = (self.width - self.width_hole) // 2
-            y01, y11 = y0 + width_wall_near_hole, y1 - width_wall_near_hole
-            # нижняя плоскость
-            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
-            # слева
-            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y0, z1), Point(x0, y0, z1), self.color)]
-            # спереди
-            arr_planes += [(Point(x1, y0, z0), Point(x1, y01, z0), Point(x1, y01, z1), Point(x1, y0, z1), self.color)]
-            arr_planes += [(Point(x1, y11, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x1, y11, z1), self.color)]
-            arr_planes += [(Point(x1, y01, z11), Point(x1, y11, z11), Point(x1, y11, z1), Point(x1, y01, z1), self.color)]
-            arr_planes += [(Point(x1, y01, z0), Point(x1, y11, z0), Point(x1, y11, z01), Point(x1, y01, z01), self.color)]
-            # справа
-            arr_planes += [(Point(x0, y1, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
-            # сзади
-            arr_planes += [(Point(x0, y0, z0), Point(x0, y01, z0), Point(x0, y01, z1), Point(x0, y0, z1), self.color)]
-            arr_planes += [(Point(x0, y11, z0), Point(x0, y1, z0), Point(x0, y1, z1), Point(x0, y11, z1), self.color)]
-            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x0, y11, z1), Point(x0, y01, z1), self.color)]
-            arr_planes += [(Point(x0, y01, z0), Point(x0, y11, z0), Point(x0, y11, z01), Point(x0, y01, z01), self.color)]
-            # сверху
-            arr_planes += [(Point(x0, y0, z1), Point(x1, y0, z1), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
-            # внутри (окна)
-            arr_planes += [(Point(x0, y01, z01), Point(x1, y01, z01), Point(x1, y01, z11), Point(x0, y01, z11), self.color)]
-            arr_planes += [(Point(x0, y11, z01), Point(x1, y11, z01), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
-            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x1, y11, z11), Point(x1, y01, z11), self.color)]
-            arr_planes += [(Point(x0, y01, z01), Point(x0, y11, z01), Point(x1, y11, z01), Point(x1, y01, z01), self.color)]
-        if (self.side_hole == Y_SIDE):
-            lenght_wall_near_hole = (self.length - self.width_hole) // 2
-            x01, x11 = x0 + lenght_wall_near_hole, x1 - lenght_wall_near_hole
+            if width_wall_near_hole == 0: width_wall_near_hole = 1
+            x01 = x0 + width_wall_near_hole
+            x11 = x01 + self.width_hole
+            if x11 == x1: x11 -= 1
             # нижняя плоскость
             arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
             # слева
@@ -212,6 +196,35 @@ class Window(Door):
             arr_planes += [(Point(x11, y0, z01), Point(x11, y1, z01), Point(x11, y1, z11), Point(x11, y0, z11), self.color)]
             arr_planes += [(Point(x01, y0, z11), Point(x11, y0, z11), Point(x11, y1, z11), Point(x01, y1, z11), self.color)]
             arr_planes += [(Point(x01, y0, z01), Point(x11, y0, z01), Point(x11, y1, z01), Point(x01, y1, z01), self.color)]
+        if (self.side_hole == Y_SIDE):
+            lenght_wall_near_hole = (self.length - self.width_hole) // 2
+            if lenght_wall_near_hole == 0: lenght_wall_near_hole = 1
+            y01 = y0 + lenght_wall_near_hole
+            y11 = y01 + self.width_hole
+            if y11 == y1: y11 -= 1
+            # нижняя плоскость
+            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y1, z0), Point(x0, y1, z0), self.color)]
+            # слева
+            arr_planes += [(Point(x0, y0, z0), Point(x1, y0, z0), Point(x1, y0, z1), Point(x0, y0, z1), self.color)]
+            # спереди
+            arr_planes += [(Point(x1, y0, z0), Point(x1, y01, z0), Point(x1, y01, z1), Point(x1, y0, z1), self.color)]
+            arr_planes += [(Point(x1, y11, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x1, y11, z1), self.color)]
+            arr_planes += [(Point(x1, y01, z11), Point(x1, y11, z11), Point(x1, y11, z1), Point(x1, y01, z1), self.color)]
+            arr_planes += [(Point(x1, y01, z0), Point(x1, y11, z0), Point(x1, y11, z01), Point(x1, y01, z01), self.color)]
+            # справа
+            arr_planes += [(Point(x0, y1, z0), Point(x1, y1, z0), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
+            # сзади
+            arr_planes += [(Point(x0, y0, z0), Point(x0, y01, z0), Point(x0, y01, z1), Point(x0, y0, z1), self.color)]
+            arr_planes += [(Point(x0, y11, z0), Point(x0, y1, z0), Point(x0, y1, z1), Point(x0, y11, z1), self.color)]
+            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x0, y11, z1), Point(x0, y01, z1), self.color)]
+            arr_planes += [(Point(x0, y01, z0), Point(x0, y11, z0), Point(x0, y11, z01), Point(x0, y01, z01), self.color)]
+            # сверху
+            arr_planes += [(Point(x0, y0, z1), Point(x1, y0, z1), Point(x1, y1, z1), Point(x0, y1, z1), self.color)]
+            # внутри (окна)
+            arr_planes += [(Point(x0, y01, z01), Point(x1, y01, z01), Point(x1, y01, z11), Point(x0, y01, z11), self.color)]
+            arr_planes += [(Point(x0, y11, z01), Point(x1, y11, z01), Point(x1, y11, z11), Point(x0, y11, z11), self.color)]
+            arr_planes += [(Point(x0, y01, z11), Point(x0, y11, z11), Point(x1, y11, z11), Point(x1, y01, z11), self.color)]
+            arr_planes += [(Point(x0, y01, z01), Point(x0, y11, z01), Point(x1, y11, z01), Point(x1, y01, z01), self.color)]
         return arr_planes
 
 

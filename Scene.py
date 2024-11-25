@@ -121,18 +121,18 @@ class Scene:
                     continue
                 # координаты точки x, y, z из вида наблюдателя линейно преобразуются в координаты x', y', z' на виде из источника света
                 x_light, y_light, z_light = self.transform_to_light_view(Point(x, y, z), params)
-                print((x, y, z), (x_light, y_light, z_light), self.transform_matrix.matrix, self.transform_matrix_light.matrix)
+                #print((x, y, z), (x_light, y_light, z_light), self.transform_matrix.matrix, self.transform_matrix_light.matrix)
                 # oкругляем x и y для индексации
                 x_light, y_light = int(x_light), int(y_light)
                 # проверяем границы
                 if 0 <= y_light < len(matrix_light) and 0 <= x_light < len(matrix_light[0]):
                     z_light_matrix = matrix_light[y_light][x_light][Z_PART]
-                    print("     ", z_light_matrix, ">", z_light)
+                    #print("     ", z_light_matrix, ">", z_light)
                     # проверка на нахождение в тени (глубина в наблюдателе больше глубины из источника + EPS)
                     if z_light + EPS < z_light_matrix and (z_light_matrix != float("-inf")):
                         # затеняем пиксель
                         matrix[y][x] = (matrix[y][x][Z_PART], darken_color(matrix[y][x][COLOR_PART], 0.8))
-                        print("тень", (x, y, z), z_light_matrix)
+                        #print("тень", (x, y, z), z_light_matrix)
                         #if (z_light_matrix == float("-inf")):
                         #    print(".", end = "")
         return matrix

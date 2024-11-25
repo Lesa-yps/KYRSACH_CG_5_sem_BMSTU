@@ -37,7 +37,7 @@ def check_sizes(entry_arr, obj_type):
 
         width_hole, height_hole, side_hole = entry_arr[5], entry_arr[6], entry_arr[7]
         # Проверка, чтобы отверстие не было шире или выше объекта + что его положение корректно
-        if (side_hole == X_SIDE and width_hole >= width) or (side_hole == Y_SIDE and width_hole >= lenght) or height_hole >= height or (side_hole != X_SIDE and side_hole != Y_SIDE):
+        if (side_hole == X_SIDE and (width - width_hole) < 2) or (side_hole == Y_SIDE and (lenght - width_hole) < 2) or height_hole >= height or (side_hole != X_SIDE and side_hole != Y_SIDE):
             rc = True
 
         elif obj_type == "окно":
@@ -67,6 +67,7 @@ def rotate_object(obj_type, entry_arr):
 
 # Определяем функцию для и добавления объекта
 def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog = None):
+    print("entry_arr", entry_arr)
     global is_painting
     # Флаг успешности проверок
     rc = True

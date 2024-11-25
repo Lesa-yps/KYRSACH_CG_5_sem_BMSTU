@@ -12,17 +12,17 @@ COLOR_PART = 1
 
 FON_COLOR = None
 BORDER_COLOR = "#000000"    
-
+BORDER_WIDTH = 2
 
 
 # Рисуем граничную линию
-def draw_border_line(matrix_pixels, point1, point2, log_file):
+def draw_border_line(matrix_pixels, point1, point2, log_file, width_line = BORDER_WIDTH):
     # log_file.write(f"   border row: {(point1.coords(), point2.coords())}\n")
     Xa, Ya, Za = point1.coords()
     Xb, Yb, Zb = point2.coords()
     dx, dy, dz = Xb - Xa, Yb - Ya, Zb - Za
     dmax = max(abs(dx), abs(dy), abs(dz))
-    add_point_to_Z_matrix(matrix_pixels, point1, BORDER_COLOR, log_file)
+    add_point_to_Z_matrix(matrix_pixels, point1, BORDER_COLOR, log_file, width_line)
     if (dmax != 0):
         # шаг изменения по коодинатам
         dx, dy, dz = dx / dmax, dy / dmax, dz / dmax
@@ -30,19 +30,22 @@ def draw_border_line(matrix_pixels, point1, point2, log_file):
         i = 0
         while (i < dmax):
             xi, yi, zi = xi + dx, yi + dy, zi + dz
-            add_point_to_Z_matrix(matrix_pixels, Point(xi, yi, zi), BORDER_COLOR, log_file)
+            add_point_to_Z_matrix(matrix_pixels, Point(xi, yi, zi), BORDER_COLOR, log_file, width_line)
             i += 1
     return matrix_pixels
 
 
 # Добавляем в Z-буфер точку с проверкой близости
-def add_point_to_Z_matrix(matrix_pixels, point, color, log_file):
+def add_point_to_Z_matrix(matrix_pixels, point, color, log_file, size_point = 1):
     X, Y, Z = map(round, point.coords())
     # log_file.write(f"     TRY TO DRAW POINT ({X}, {Y}, {Z}) into matrix n = {len(matrix_pixels)} m = {len(matrix_pixels[0])}")
-    if Y < len(matrix_pixels) and X < len(matrix_pixels[0]) and X >= 0 and Y >= 0:
+    i = 0
+    while Y < len(matrix_pixels) and X < len(matrix_pixels[0]) and X >= 0 and Y >= 0 and i < size_point:
         if matrix_pixels[Y][X][Z_PART] <= Z and not (matrix_pixels[Y][X][COLOR_PART] == BORDER_COLOR and matrix_pixels[Y][X][Z_PART] == Z):
             matrix_pixels[Y][X] = (Z, color)
             # log_file.write(f" - DONE")
+        X, Y, Z = X + 1, Y + 1, Z + 1
+        i += 1
     # log_file.write(f"\n")
     return matrix_pixels
 
@@ -54,7 +57,7 @@ def add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file):
     dz = Zb - Za
     dmax = max(abs(dx), abs(dz))
     add_point_to_Z_matrix(matrix_pixels, point1, color, log_file)
-    if (abs(dmax) < 0.001):
+    if (abs(dmax) > 0.001):
         # шаг изменения по коодинатам
         dx /= dmax
         dz /= dmax

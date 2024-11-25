@@ -64,6 +64,8 @@ def load_scene_file(Facade, table, scene_width_spinbox, scene_height_spinbox, fi
 
                 # Добавляем объект в сцену, если не возникло ошибок
                 rc = submit(Facade, table, obj_type, color, entry_arr)
+                if not rc:
+                    return rc
         Facade.redraw_scene()
         messagebox.showinfo("Успех", f"Сцена успешно загружена из файла {file_path}!") 
 
