@@ -348,9 +348,9 @@ make_cnv_button('вверх', button_move_plane1_frame, 10, move_up).grid(
     row=0, column=0, stick='we')
 make_cnv_button('вниз', button_move_plane1_frame, 10, move_down).grid(
     row=0, column=1, stick='we')
-make_cnv_button('вправо', button_move_plane1_frame, 10, move_right).grid(
-    row=0, column=2, stick='we')
 make_cnv_button('влево', button_move_plane1_frame, 10, move_left).grid(
+    row=0, column=2, stick='we')
+make_cnv_button('вправо', button_move_plane1_frame, 10, move_right).grid(
     row=0, column=3, stick='we')
 make_cnv_button('увеличить', button_move_plane1_frame, 10, zoom_in).grid(
     row=0, column=5, stick='we')

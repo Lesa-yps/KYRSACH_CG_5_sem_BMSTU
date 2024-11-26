@@ -1,5 +1,6 @@
 import time as t
 import matplotlib.pyplot as plt
+import csv
 from Point import Point
 from Scene import Scene
 
@@ -11,8 +12,26 @@ class FakeCanvas:
     pass
 
 
+# функция для записи данных в CSV
+def save_to_csv(num_planes_list, seq_times, par_times, filename):
+    # вычисляем ускорение параллельной обработки по сравнению с последовательной
+    speedups = [seq / par if par > 0 else None for seq, par in zip(seq_times, par_times)]
+    # запись данных в CSV
+    with open(filename, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Количество плоскостей", "Последовательно (сек)", "Параллельно (сек)", "Ускорение"])
+        for num_planes, seq_time, par_time, speedup in zip(num_planes_list, seq_times, par_times, speedups):
+            writer.writerow([
+                num_planes,
+                f"{seq_time:.4f}",
+                f"{par_time:.4f}" if par_time is not None else "N/A",
+                f"{speedup:.4f}" if speedup is not None else "N/A"
+            ])
+    print(f"Данные успешно сохранены в файл {filename}")
+
+
 # рисует графики по собранным данным
-def draw_graphs(num_planes_list, seq_times, par_times):
+def draw_graphs(num_planes_list, seq_times, par_times, filename):
     # вычисляем ускорение параллельной обработки по сравнению с последовательной
     speedups = [seq / par if par > 0 else None for seq, par in zip(seq_times, par_times)]
 
@@ -41,7 +60,7 @@ def draw_graphs(num_planes_list, seq_times, par_times):
 
     # сохранение и отображение и графиков
     plt.tight_layout()
-    plt.savefig('test_calc_pixel_matrix_performance.png')
+    plt.savefig(filename)
     plt.show()
 
 
@@ -90,4 +109,7 @@ if __name__ == "__main__":
         par_times_list.append(par_time)
 
     # рисует графики по собранным данным
-    draw_graphs(num_planes_list, seq_times_list, par_times_list)
+    draw_graphs(num_planes_list, seq_times_list, par_times_list, 'test_calc_pixel_matrix_performance.png')
+
+    # сохраняеет данные в таблицу (CSV)
+    save_to_csv(num_planes_list, seq_times_list, par_times_list, 'test_calc_pixel_matrix_performance.csv')
