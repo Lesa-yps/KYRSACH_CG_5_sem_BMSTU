@@ -16,3 +16,9 @@ source venv/bin/activate
 pip install coverage pytest numpy
 make -f iu7cglabs_kostritsky report-unittesting-latest.txt
 deactivate
+
+
+формат данных:
+
+сцена <цвет> <ширина> <длина>
+<тип объекта> <цвет> <ширина> <высота> <длина> <смещение_x> <смещение_y> [<ширина отверстия> <высота отверстия> <сторона отверстия>] [<смещение вверх для отверстия>]

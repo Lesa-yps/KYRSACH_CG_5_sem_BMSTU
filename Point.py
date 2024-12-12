@@ -57,11 +57,37 @@ class Point:
             abs(self.y - point1.y) < eps and
             abs(self.z - point1.z) < eps
         )
+    
+    # Нормализация вектора
+    def normalize(self):
+        magnitude = (self.x**2 + self.y**2 + self.z**2)**0.5
+        if magnitude > 1e-6:
+            self.x /= magnitude
+            self.y /= magnitude
+            self.z /= magnitude
+        return self
+
+    # Векторное произведение с другим вектором (Point)
+    def cross(self, point):
+        cx = self.y * point.z - self.z * point.y
+        cy = self.z * point.x - self.x * point.z
+        cz = self.x * point.y - self.y * point.x
+        return Point(cx, cy, cz)
+    
+    # Скалярное произведение с другим вектором (Point)
+    def dot(self, point):
+        return self.x * point.x + self.y * point.y + self.z * point.z
 
 
 # Пример использования класса Point
 if __name__ == "__main__":
-    point = Point(1, 2, 3)
-    point.x = 0
-    point.print_coords()
-    
+    point1 = Point(1, 2, 3)
+    point2 = Point(4, 5, 6)
+
+    # Нормализация
+    normalized = point1.copy().normalize()
+    print("Normalized point1:", normalized.coords())
+
+    # Векторное произведение
+    cross_product = point1.cross(point2)
+    print("Cross product of point1 and point2:", cross_product.coords())

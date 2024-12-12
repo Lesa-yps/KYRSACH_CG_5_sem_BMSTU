@@ -1,4 +1,5 @@
 from Point import Point
+from Change_color import lighten_color
 
 # алгоритм реализующий Z-буфер
 # на вход: кортеж - смещение экрана по х и у, кортеж - ширина и высота экрана +
@@ -13,6 +14,30 @@ COLOR_PART = 1
 FON_COLOR = None
 BORDER_COLOR = "#000000"    
 BORDER_WIDTH = 2
+
+# вычисляет диффузное освещение
+def compute_diffuse_light(point, normal, light_source, light_intensity=0.9, k_d=0.3):
+    # вектор к источнику света
+    light_vector = Point(
+        light_source.x - point.x,
+        light_source.y - point.y,
+        light_source.z - point.z
+    ).normalize()
+    # угол между нормалью и направлением света
+    cos_theta = max(0, normal.dot(light_vector))
+    # итоговая интенсивность цвета
+    intensity = k_d * light_intensity * cos_theta
+    return intensity
+
+# рассчитывает нормаль к плоскости
+def calculate_normal(p1, p2, p3):
+    # векторы на гранях
+    v1 = Point(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z)
+    v2 = Point(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z)
+    # векторное произведение
+    normal = v1.cross(v2).normalize()
+    return normal
+
 
 
 # Рисуем граничную линию
@@ -168,9 +193,11 @@ def anti_transform_plane_point(point1, offsets, dimensions, center_point, scale_
 
 
 # преобразования точек
-def transform_plane_points(plane, params, transform_matrix):
+def transform_plane_points(plane, params, transform_matrix, log_file):
     point1, point2, point3, point4, color = plane
+    log_file.write(f"was = {point1.coords()}")
     point1 = transform_plane_point(point1, *params, transform_matrix)
+    log_file.write(f" now = {point1.coords()}\n")
     point2 = transform_plane_point(point2, *params, transform_matrix)
     point3 = transform_plane_point(point3, *params, transform_matrix)
     point4 = transform_plane_point(point4, *params, transform_matrix)
@@ -178,9 +205,11 @@ def transform_plane_points(plane, params, transform_matrix):
 
 
 # Алгоритм Z-буфера для списка плоскостей
-def Z_buffer_algo(list_planes, offsets, dimensions, center_point, scale_coef, size_square, max_z, transform_matrix, log_filename):
+def Z_buffer_algo(list_planes, offsets, dimensions, center_point, scale_coef, size_square, max_z, light_point, transform_matrix, log_filename):
 
     log_file = open(log_filename, "w")
+
+    log_file.write(f"{offsets, dimensions, center_point, scale_coef, size_square, max_z, transform_matrix}\n")
 
     # распаковка входных данных
     (dx_screen, dy_screen) = offsets
@@ -198,7 +227,15 @@ def Z_buffer_algo(list_planes, offsets, dimensions, center_point, scale_coef, si
     for i in range(len(list_planes)):
         # преобразования точек
         params = (offsets, dimensions, center_point, scale_coef, size_square, max_z)
-        list_planes[i] = transform_plane_points(list_planes[i], params, transform_matrix)
+        point1, point2, point3, point4, base_color = list_planes[i]
+        # считаем интенсивность освещения для плоскости
+        normal = calculate_normal(point1, point2, point3)
+        diffuse_intensity = compute_diffuse_light(point1, normal, light_point)
+        color = lighten_color(base_color, diffuse_intensity)
+        #color = base_color
+        list_planes[i] = (point1, point2, point3, point4, color)
+        print(f"Plane {i}: Normal={normal}, DiffuseIntensity={diffuse_intensity}, BaseColor={base_color}, FinalColor={color}")
+        list_planes[i] = transform_plane_points(list_planes[i], params, transform_matrix, log_file)
         
     for plane in list_planes:
         point1, point2, point3, point4, color = plane
