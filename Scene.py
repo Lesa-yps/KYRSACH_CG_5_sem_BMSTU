@@ -26,7 +26,7 @@ class Scene:
         self.objects = Objects()
         self.canvas = canvas
         # координаты источника света по х, y и z
-        self.point_light = Point(0, 0, DEF_MAX_Z)
+        self.point_light = Point(0, 0, 100000)
         # координаты зрителя
         self.point_look = Point(0, 0, DEF_MAX_Z)
         # пол
@@ -50,7 +50,7 @@ class Scene:
     def start_scene_not_redraw(self):
         self.objects.clear()
         # координаты источника света по х, y и z
-        self.point_light = Point(0, 0, DEF_MAX_Z)
+        self.point_light = Point(0, 0, 100000)
         # координаты зрителя
         self.point_look = (0, 0, DEF_MAX_Z)
         # пол
@@ -114,20 +114,18 @@ class Scene:
                     continue
                 # координаты точки x, y, z из вида наблюдателя линейно преобразуются в координаты x', y', z' на виде из источника света
                 x_light, y_light, z_light = self.transform_to_light_view(Point(x, y, z), params)
-                #print((x, y, z), (round(x_light), round(y_light), z_light), (x, y, z) != (round(x_light), round(y_light), round(z_light)), len(matrix_light), len(matrix_light[0]))
-                # oкругляем x и y для индексации
                 x_light, y_light = round(x_light), round(y_light)
-                # проверяем границы
-                if 0 <= y_light < len(matrix_light) and 0 <= x_light < len(matrix_light[0]):
-                    z_light_matrix = matrix_light[y_light][x_light][Z_PART]
-                    #print("     ", z_light_matrix, ">", z_light)
-                    # проверка на нахождение в тени (глубина в наблюдателе больше глубины из источника + EPS)
-                    if z_light + EPS < z_light_matrix and (z_light_matrix != float("-inf")):
-                        # затеняем пиксель
-                        matrix[y][x] = (matrix[y][x][Z_PART], darken_color(matrix[y][x][COLOR_PART], 0.8))
-                        #print("тень")
-                        #if (z_light_matrix == float("-inf")):
-                        #    print(".", end = "")
+                if not (0 <= x_light < len(matrix_light[0]) and 0 <= y_light < len(matrix_light)):
+                    print(f"Out of bounds: {x_light}, {y_light}")
+                    continue
+                z_light_matrix = matrix_light[y_light][x_light][Z_PART]
+                if z_light + EPS < z_light_matrix:
+                    print(f"Shadow added at ({x}, {y}) with z_light={z_light}, z_light_matrix={z_light_matrix}")
+                    # затеняем пиксель
+                    matrix[y][x] = (matrix[y][x][Z_PART], darken_color(matrix[y][x][COLOR_PART], 0.8))
+                    #print("тень")
+                    #if (z_light_matrix == float("-inf")):
+                    #    print(".", end = "")
         return matrix
     
     # отрисовка готовой матрицы с подсчетом закрашенных клеток и времени работы
@@ -172,9 +170,10 @@ class Scene:
             matrix = Z_buffer_algo(*params_Z_buffer, self.transform_matrix, "log_file_Z.txt")
             # алгоритм Z буффера для добавления теней
             matrix_light = Z_buffer_algo(*params_Z_buffer,  self.transform_matrix_light, "log_file_Z_light.txt")
+        print("---\n", matrix, "\n", matrix_light)
         # наложение матрицы теней на основную матрицу
-        matrix = self.combo_matrix(matrix, matrix_light, params_Z_buffer[1:-1])
-        return matrix
+        matrix_res = self.combo_matrix(matrix, matrix_light, params_Z_buffer[1:-1])
+        return matrix_res
 
     # зарисовка всех объектов сцены
     def draw_scene(self, is_draw = True, is_parallel = True):

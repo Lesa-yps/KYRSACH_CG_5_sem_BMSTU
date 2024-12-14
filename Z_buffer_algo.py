@@ -234,7 +234,7 @@ def Z_buffer_algo(list_planes, offsets, dimensions, center_point, scale_coef, si
         color = lighten_color(base_color, diffuse_intensity)
         #color = base_color
         list_planes[i] = (point1, point2, point3, point4, color)
-        print(f"Plane {i}: Normal={normal}, DiffuseIntensity={diffuse_intensity}, BaseColor={base_color}, FinalColor={color}")
+        #print(f"Plane {i}: Normal={normal}, DiffuseIntensity={diffuse_intensity}, BaseColor={base_color}, FinalColor={color}")
         list_planes[i] = transform_plane_points(list_planes[i], params, transform_matrix, log_file)
         
     for plane in list_planes:
