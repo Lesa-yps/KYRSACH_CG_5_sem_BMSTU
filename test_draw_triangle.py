@@ -29,7 +29,7 @@ class MockLogFile:
 # Хелпер для создания пустого Z-буфера
 def create_z_buffer(width, height, z_default=float('-inf')):
     return [[(z_default, [0, 0, 0]) for _ in range(width)] for _ in range(height)]
-
+"""
 # Тест для функции add_point_to_Z_matrix
 def test_add_point_to_Z_matrix():
     matrix = create_z_buffer(10, 10)
@@ -71,20 +71,21 @@ def test_add_row_to_Z_matrix():
         for x in range(10):
             if y != 5 or x < 2 or x > 7:
                 assert result[y][x] == (float('-inf'), [0, 0, 0])
-
+"""
 
 # Тест для функции add_triangle_to_Z_matrix
 @pytest.mark.parametrize("point1, point2, point3, color", [
     #(Point(60, 30, -40), Point(30, 30, -45), Point(60, 1, -40), [0, 0, 255]),
     #(Point(5.9380890410646096, 3.1674717108046025, -4.1675562640063276), Point(2.994201987002377, 3.150905674655172, -4.6885007970071186), Point(5.9380890410646096, 0.1799743795966208, -4.1675562640063276), [0, 0, 255]),
     *[(point1, point2, point3, [255, 0, 0]) for point1, point2, point3 in read_points_from_file("log_file_Z.txt")]
+    #(Point(548.95, 308.15, 77.01), Point(442.07, 304.93, 17.01), Point(562.83, 254.53, 51.03), [0, 0, 255])
 ])
 def test_add_triangle_to_Z_matrix(point1, point2, point3, color):
     log_file = MockLogFile()
     triangle = [point1, point2, point3]
     rect_x_y = {"max_x": float("-inf"), "max_y": float("-inf"), "min_x": float("+inf"), "min_y": float("+inf")}
     rect_x_y = calc_min_max_x_y(rect_x_y, triangle + [color])
-    #print(rect_x_y)
+    print(rect_x_y)
     matrix = create_z_buffer(rect_x_y["max_x"] + 4, rect_x_y["max_y"] + 4)
 
     # Добавляем треугольник

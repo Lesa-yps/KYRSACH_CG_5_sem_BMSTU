@@ -2,37 +2,40 @@
 \section{Исследовательская часть}
 
 \hspace{1.25cm}
-В данном разделе буду рассмотрены результаты работы программы на разных входных данных, а также проведены сравнения параллельной и последовательной работы программы и ускорения, связанного с распараллеливанием.
+В данном разделе будут рассмотрены результаты работы программы на разных входных данных, а также проведены сравнения параллельной и последовательной работы программы и ускорения, связанного с распараллеливанием.
 
 
 \subsection{Примеры работы программы}
 
 \hspace{1.25cm}
-На рисунке~\ref{fig:example_flat_0_0_0} представлена работа программы на примере комнаты из двух окон, двери и 4 стенах при углах наклона сцены 0 градусов по всем осям.
+На рисунках~\ref{fig:example_flat_1_1}-\ref{fig:example_flat_1_4} представлена работа программы на примере комнаты из двух окон, двери и 4 стенах при различных углах поворота камеры и положения источника света по всем осям.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/example_flat_0_0_0.png}
-    \caption{Пример комнаты при углах наклона сцены 0 по всем осям.}
-    \label{fig:example_flat_0_0_0}
+    \includegraphics[width=1\textwidth]{img/example_light_0_0_0_camera_0_0_0.png}
+    \caption{Пример комнаты при углах поворота камеры (0, 0, 0) и света (0, 0, 0).}
+    \label{fig:example_flat_1_1}
 \end{figure}
 
-На рисунке~\ref{fig:example_flat_60_-20_0} представлена работа программы при той же введённой комнате при углах наклона сцены 60, -20 и 0 градусов по осям x, y и z соответственно.
-
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/example_flat_60_-20_0.png}
-    \caption{Пример комнаты при углах наклона сцены 60, -20 и 0 градусов по осям x, y и z соответственно.}
-    \label{fig:example_flat_60_-20_0}
+    \includegraphics[width=1\textwidth]{img/example_light_0_30_0_camera_60_-60_0.png}
+    \caption{Пример комнаты при углах поворота камеры (0, 30, 0) и света (60, -60, 0).}
+    \label{fig:example_flat_1_2}
 \end{figure}
 
-На рисунке~\ref{fig:example_flat_50_50_180} представлена работа программы при тех же введённых данных при углах наклона сцены 50, 50 и 180 градусов по осям x, y и z соответственно.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/example_light_10_0_30_camera_60_180_0.png}
+    \caption{Пример комнаты при углах поворота камеры (10, 0, 30) и света (60, 180, 0).}
+    \label{fig:example_flat_1_3}
+\end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/example_flat_50_50_180.png}
-    \caption{Пример комнаты при углах наклона сцены 50, 50 и 1800 градусов по осям x, y и z соответственно.}
-    \label{fig:example_flat_50_50_180}
+    \includegraphics[width=1\textwidth]{img/example_light_60_0_0_camera_30_0_0.png}
+    \caption{Пример комнаты при углах поворота камеры (60, 0, 0) и света (30, 0, 0).}
+    \label{fig:example_flat_1_4}
 \end{figure}
 
 

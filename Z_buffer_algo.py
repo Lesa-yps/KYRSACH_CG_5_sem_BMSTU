@@ -66,7 +66,7 @@ def add_point_to_Z_matrix(matrix_pixels, point, color, log_file, size_point = 1)
     # #log_file.write(f"     TRY TO DRAW POINT ({X}, {Y}, {Z}) into matrix n = {len(matrix_pixels)} m = {len(matrix_pixels[0])}")
     i = 0
     while Y < len(matrix_pixels) and X < len(matrix_pixels[0]) and X >= 0 and Y >= 0 and i < size_point:
-        if matrix_pixels[Y][X][Z_PART] <= Z and not (matrix_pixels[Y][X][COLOR_PART][0] == BORDER_COLOR and matrix_pixels[Y][X][Z_PART] == Z):
+        if matrix_pixels[Y][X][Z_PART] <= Z and not (matrix_pixels[Y][X][COLOR_PART][0] == BORDER_COLOR and abs(matrix_pixels[Y][X][Z_PART] - Z) < 5):
             matrix_pixels[Y][X] = (Z, color)
             # #log_file.write(f" - DONE")
         X, Y, Z = X + 1, Y + 1, Z + 1
@@ -98,6 +98,9 @@ def add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file):
 def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
     # сортируем точки по высоте (у)
     C, B, A = tuple(sorted(list(triangle), key=lambda point: point.y))
+    #A.x, A.y, A.z = round(A.x, 2), round(A.y, 2), round(A.z, 2)
+    #B.x, B.y, B.z = round(B.x, 2), round(B.y, 2), round(B.z, 2)
+    #C.x, C.y, C.z = round(C.x, 2), round(C.y, 2), round(C.z, 2)
     log_file.write(f"Point{A.coords()}, Point{B.coords()}, Point{C.coords()}\n")
     y_min, y_max = C.y, A.y
 
@@ -109,7 +112,7 @@ def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
     def compute_deltas(p1, p2):
         dy = p2.y - p1.y
         # eps для предотвращения деления на 0
-        if abs(dy) >= 1:  
+        if abs(dy) >= 1: 
             dx = (p2.x - p1.x) / abs(dy)
             dz = (p2.z - p1.z) / abs(dy)
             #print(p1.coords(), p2.coords(), dy, p2.x - p1.x, dx, p2.z - p1.z, dz)
@@ -126,28 +129,45 @@ def add_triangle_to_Z_matrix(matrix_pixels, triangle, color, log_file):
 
     # Проходимся по всем строкам у
     point1 = Point(A.x, y_max, A.z) # одна из границ строки по у
-    is_change_side = False
     # вторая граница строки по у
-    if dy_AB == 0:
+    if abs(dy_AB) < 0.001:
         point2 = Point(B.x, y_max, B.z)
         is_change_side = True
     else:
-        point2 = Point(A.x, y_max, A.z) 
-    while point1.y >= y_min:
+        point2 = Point(A.x, y_max, A.z)
+        is_change_side = False
+
+    diff_p2B = point2.y - B.y
+    #print(f"Перед циклом: is_change_side = {is_change_side}, diff_p2B = {diff_p2B}, while {not is_change_side and not (diff_p2B < 0.001)}")
+    while not is_change_side and not (diff_p2B < 0.001):
+        #print("TYT")
         # обработка строки от point1 до point2
         matrix_pixels = add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file)
         #print((f"        ROW: {point1.coords()} to {point2.coords()}\n"))
         #log_file.write(f"        ROW: {point1.coords()} to {point2.coords()}\n")
-
-        if point2.y <= B.y:
-            is_change_side = True
-        
-        if is_change_side:
-            point2.add(dx_BC, -1, dz_BC)
+        #print(f"            is_change_side = {is_change_side} point2.y = {point2.y} B.y = {B.y} diff = {point2.y - B.y}")
+        if diff_p2B < 1:
+            point2.add(dx_AB * diff_p2B, -diff_p2B, dz_AB * diff_p2B)
+            point1.add(dx_AC * diff_p2B, -diff_p2B, dz_AC * diff_p2B)
         else:
             point2.add(dx_AB, -1, dz_AB)
+            point1.add(dx_AC, -1, dz_AC)
+        diff_p2B = point2.y - B.y
 
-        point1.add(dx_AC, -1, dz_AC)
+    diff_p1min = point1.y - y_min
+    while not diff_p1min < 0.001:
+        # обработка строки от point1 до point2
+        matrix_pixels = add_row_to_Z_matrix(matrix_pixels, point1, point2, color, log_file)
+        #print((f"        ROW: {point1.coords()} to {point2.coords()}\n"))
+        #log_file.write(f"        ROW: {point1.coords()} to {point2.coords()}\n")
+        #print(f"            is_change_side = {is_change_side} point2.y = {point2.y} B.y = {B.y} diff = {point2.y - B.y}")
+        if diff_p1min < 1:
+            point2.add(dx_BC * diff_p1min, -diff_p1min, dz_BC * diff_p1min)
+            point1.add(dx_AC * diff_p1min, -diff_p1min, dz_AC * diff_p1min)
+        else:
+            point2.add(dx_BC, -1, dz_BC)
+            point1.add(dx_AC, -1, dz_AC)
+        diff_p1min = point1.y - y_min
 
     return matrix_pixels
 
@@ -230,7 +250,7 @@ def calc_min_max_x_y(rect_x_y, plane):
 
 
 # Алгоритм Z-буфера для списка плоскостей
-def Z_buffer_algo(list_planes, offsets, dimensions, center_point1, scale_coef, size_square, max_z, light_point, transform_matrix, log_filename):
+def Z_buffer_algo(list_planes_old, offsets, dimensions, center_point1, scale_coef, size_square, max_z, light_point, transform_matrix, log_filename):
 
     log_file = open(log_filename, "w")
 
@@ -247,21 +267,22 @@ def Z_buffer_algo(list_planes, offsets, dimensions, center_point1, scale_coef, s
     center_point.y = - center_point.y
 
     rect_x_y = {"max_x": float("-inf"), "max_y": float("-inf"), "min_x": float("+inf"), "min_y": float("+inf")}
+    list_planes = list()
 
     # сам алгоритм:
     # проходимся по всем плоскостям
-    for i in range(len(list_planes)):
+    for i in range(len(list_planes_old)):
         # преобразования точек
         params = (offsets, dimensions, center_point, scale_coef, size_square, max_z)
-        point1, point2, point3, point4, base_color = list_planes[i]
+        point1, point2, point3, point4, base_color = list_planes_old[i]
         # считаем интенсивность освещения для плоскости
         normal = calculate_normal(point1, point2, point3)
         diffuse_intensity = compute_diffuse_light(point1, normal, light_point)
         color = lighten_color(base_color, diffuse_intensity)
         #color = base_color
-        list_planes[i] = (point1, point2, point3, point4, (base_color, color))
+        new_plane = (point1, point2, point3, point4, (base_color, color))
         #print(f"Plane {i}: Normal={normal}, DiffuseIntensity={diffuse_intensity}, BaseColor={base_color}, FinalColor={color}")
-        list_planes[i] = transform_plane_points(list_planes[i], params, transform_matrix, log_file)
+        list_planes.append(transform_plane_points(new_plane, params, transform_matrix, log_file))
         rect_x_y = calc_min_max_x_y(rect_x_y, list_planes[i])
 
     # матрица кортежей (буфер кадра - фоновое значение, Z-буфер - минус бесконечность)

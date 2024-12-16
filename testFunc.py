@@ -5,11 +5,23 @@ from Point import Point
 from Scene import Scene
 
 DEF_COLOR = "#333333"
-MAX_COUNT_PLANES = 200
+MAX_COUNT_PLANES = 100
 
 # фейковый canvas, чтобы инициализировать Scene
 class FakeCanvas:
     pass
+
+
+# Mock для лог-файла
+class MockLogFile:
+    def __init__(self):
+        self.content = []
+    
+    def write(self, message):
+        self.content.append(message)
+    
+    def get_content(self):
+        return self.content
 
 
 # функция для записи данных в CSV
@@ -22,10 +34,11 @@ def save_to_csv(num_planes_list, seq_times, par_times, filename):
         writer.writerow(["Количество плоскостей", "Последовательно (сек)", "Параллельно (сек)", "Ускорение"])
         for num_planes, seq_time, par_time, speedup in zip(num_planes_list, seq_times, par_times, speedups):
             writer.writerow([
-                num_planes,
-                f"{seq_time:.4f}",
-                f"{par_time:.4f}" if par_time is not None else "N/A",
-                f"{speedup:.4f}" if speedup is not None else "N/A"
+                f"{num_planes} &",
+                f"{seq_time:.4f} &",
+                f"{par_time:.4f} &" if par_time is not None else "N/A &",
+                f"{speedup:.4f}" if speedup is not None else "N/A",
+                "\\"
             ])
     print(f"Данные успешно сохранены в файл {filename}")
 
@@ -67,13 +80,13 @@ def draw_graphs(num_planes_list, seq_times, par_times, filename):
 # функция тестирует calc_pixel_matrix параллельно или последовательно по числу плоскостей = размеру сцены (т.к. плоскости 1х1 по диагонали)
 def test_calc_pixel_matrix(scene, num_planes, is_parallel):
     # генерация тестовых плоскостей
-    list_planes = []
+    list_planes = list()
     for i in range(num_planes):
         plane = (Point(i, i, 0), Point(i + 1, i, 0), Point(i + 1, i + 1, 0), Point(i, i + 1, 0), DEF_COLOR)
         list_planes.append(plane)
 
     # параметры Z-буфера
-    params_Z_buffer = (list_planes, (0, 0), (800, 600), Point(num_planes / 2, num_planes / 2, 0), 1, 30, 1000)
+    params_Z_buffer = (list_planes, (0, 0), (800, 600), Point(num_planes / 2, num_planes / 2, 0), 1, 30, 1000, Point(0, 0, 1000))
 
     # измерение времени выполнения
     start_time = t.time()
@@ -90,9 +103,9 @@ if __name__ == "__main__":
     scene = Scene(canvas)
 
     # размеры сцены для тестов
-    i = 0
+    i = 1
     num_planes_list = list()
-    diff = 1
+    diff = 2
     while i < MAX_COUNT_PLANES:
         num_planes_list.append(i)
         i += diff

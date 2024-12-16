@@ -198,7 +198,7 @@ class Scene:
 
     # зарисовка всех объектов сцены
     def draw_scene(self, is_draw = True, is_parallel = True):
-        print('     draw_scene!', self.transform_matrix.print_matrix())
+        #print('     draw_scene!', self.transform_matrix.print_matrix())
         (width, height) = self.calc_coords_screen()
         # получение списка плоскостей с цветами
         list_planes = self.calc_list_planes()
@@ -206,11 +206,11 @@ class Scene:
         floor_planes, center_point = self.create_floor_coords()
         list_planes += floor_planes
         point_light = self.transform_matrix_light.transform_point(self.point_light)
-        print((self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), center_point.coords(), self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z, point_light.coords())
+        #print((self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), center_point.coords(), self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z, point_light.coords())
         params_Z_buffer = (list_planes, (self.SIDE_PLACE, self.HEIGHT_PLACE), (width, height), center_point, self.ZOOM, DEF_SIZE_SQARES, DEF_MAX_Z, point_light)
         # вычисляет матрицу пикселей (Z-буфер) для экрана
-        print("TYT")
-        print("list_planes", [(i1.coords(), i2.coords(), i3.coords(), i4.coords(), color) for (i1, i2, i3, i4, color) in list_planes])
+        #print("TYT")
+        #print("list_planes", [(i1.coords(), i2.coords(), i3.coords(), i4.coords(), color) for (i1, i2, i3, i4, color) in list_planes])
         matrix, d_x_y = self.calc_pixel_matrix(params_Z_buffer, is_parallel)
         # отрисовка готовой матрицы (время работы выводится в командную строку)
         if is_draw:
