@@ -67,7 +67,7 @@ def rotate_object(obj_type, entry_arr):
 
 # Определяем функцию для и добавления объекта
 def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog = None):
-    print("entry_arr", entry_arr)
+    #print("entry_arr", entry_arr)
     global is_painting
     # Флаг успешности проверок
     rc = True

@@ -16,7 +16,9 @@ from Scene import Scene
 MAX_SCENE_SIZE = 1000
 
 list_of_objects = [(0, "стена"), (1, "дверь"), (2, "окно")]
-# 
+list_of_axis = ['X', 'Y', 'Z']
+
+
 # Константы
 MIN_WIDTH = 1300  # минимальная ширина окна приложения
 MIN_HEIGHT = 910  # минимальная высота окна приложения
@@ -24,6 +26,7 @@ SIZE_OF_CANVAS = 500  # размер холста
 STEP_CONST = 50  # шаг перемещения
 color_scene = "#cccccc"  # цвет сцены по-умолчанию серый
 num_choose_object = 0  # номер выбранного объекта в выпадающем списке (стена / дверь / окно)
+num_choose_axis = 0  # номер выбранной оси в выпадающем списке (x / y / z)
 
 
 # сброс всего наработанного
@@ -63,8 +66,10 @@ def fork(text: str) -> None:
         mb.showerror('Ошибка!', "Дождитесь конца отрисовки!")
         return
     is_painting.value = True
-    if text in ['X', 'Y', 'Z']:
-        Facade.rotate_camera(text, float(angle_camera_rotate.get()))
+    if text == 'Вращать камеру':
+        Facade.rotate_camera(list_of_axis[num_choose_axis], float(angle_rotate.get()))
+    elif text == 'Вращать свет':
+        Facade.rotate_light(list_of_axis[num_choose_axis], float(angle_rotate.get()))
     elif text == 'Добавить объект':
         add_object_dialog(Facade, tree, chooser_object_combobox.get())
     elif text == 'Изменить объект':
@@ -126,7 +131,7 @@ def make_button(doing: str, button_frame: tk.Frame, width1: int) -> tk.Button:
                      activebackground="salmon", bg="khaki", height=1, width=width1, cursor="hand1")
 
 
-# Функция для обработки события выбора функции в выпадающем списке
+# Функция для обработки события выбора объекта в выпадающем списке
 def what_choose_object(event: tk.Event):
     global num_choose_object
     num_choose_object = chooser_object_combobox.current()
@@ -235,24 +240,33 @@ color_display.grid(row=0, column=1, padx=5)
 
 
 
-# ИЗМЕНЕНИЕ ПОЛОЖЕНИЯ КАМЕРЫ
+# Функция для обработки события выбора оси в выпадающем списке
+def what_choose_axis(event: tk.Event):
+    global num_choose_axis
+    num_choose_axis = chooser_axis_combobox.current()
+
+# ИЗМЕНЕНИЕ ПОЛОЖЕНИЯ КАМЕРЫ И СВЕТА
 # (вращение по х, y и по z изменять)
-camera_rotate_frame = tk.Frame(window, bg="lightpink", highlightbackground="PaleVioletRed", highlightcolor="IndianRed", highlightthickness=7)
-camera_rotate_frame.grid(row=2, column=0, padx=5, pady=10)
-tk.Label(camera_rotate_frame, text="Вращать камеру:", font=("Calibry", 12), bg="lightpink").grid(
-    row=0, column=0, columnspan=6, sticky="w")
-tk.Label(camera_rotate_frame, text="Угол (в град.):", font=("Calibry", 12), bg="lightpink").grid(
-    row=1, column=0, sticky="w")
-angle_camera_rotate = tk.Spinbox(camera_rotate_frame, from_=-360, to=360, width=5)
-angle_camera_rotate.grid(row=1, column=1, stick='we', pady=2)
-tk.Label(camera_rotate_frame, text="Ось вращения:", font=("Calibry", 12), bg="lightpink").grid(
-    row=1, column=2, sticky="w")
-# вращение по х
-make_button('X', camera_rotate_frame, 2).grid(row=1, column=3, stick='we')
-# вращение по y
-make_button('Y', camera_rotate_frame, 2).grid(row=1, column=4, stick='we')
-# вращение по z
-make_button('Z', camera_rotate_frame, 2).grid(row=1, column=5, stick='we')
+camera_light_rotate_frame = tk.Frame(window, bg="lightpink", highlightbackground="PaleVioletRed", highlightcolor="IndianRed", highlightthickness=7)
+camera_light_rotate_frame.grid(row=2, column=0, padx=5, pady=10)
+tk.Label(camera_light_rotate_frame, text="Вращать: угол (в гр.):", font=("Calibry", 12), bg="lightpink").grid(
+    row=0, column=0, sticky="w")
+angle_rotate = tk.Spinbox(camera_light_rotate_frame, from_=-360, to=360, width=5)
+angle_rotate.grid(row=0, column=1, stick='we', pady=2)
+tk.Label(camera_light_rotate_frame, text="ось вращения:", font=("Calibry", 12), bg="lightpink").grid(
+    row=0, column=2, sticky="w")
+# Создаем выпадающий список объектов
+chooser_axis_combobox = ttk.Combobox(camera_light_rotate_frame, width=10, height=35, font=("Calibry", 12), state="readonly")
+chooser_axis_combobox["values"] = [i[-1] for i in list_of_axis]  # Устанавливаем список вариантов
+chooser_axis_combobox.current(num_choose_axis)  # Устанавливаем начальное значение (X)
+# Привязываем обработчик события выбора элемента
+chooser_axis_combobox.bind("<<ComboboxSelected>>", what_choose_axis)
+chooser_axis_combobox.grid(row=0, column=3, padx=5, pady=2, sticky="we")
+# вращение камеры
+make_button('Вращать камеру', camera_light_rotate_frame, 2).grid(row=1, column=0, columnspan=2, stick='we')
+# вращение света
+make_button('Вращать свет', camera_light_rotate_frame, 2).grid(row=1, column=2, columnspan=2, stick='we')
+
 
 
 # ЗАГРУЗКА И СОХРАНЕНИЕ СЦЕНЫ
@@ -415,6 +429,7 @@ def scroll(event: tk.Event) -> None:
         zoom_in()
     else:
         zoom_out()
+    Facade.redraw_scene()
 # Функция для обработки события нажатия клавиш клавиатуры
 
 
@@ -427,6 +442,9 @@ def key_press(event: tk.Event) -> None:
         move_left()
     elif event.keysym == "Right":
         move_right()
+    else:
+        return
+    Facade.redraw_scene()
 
 
 # Привязка обработчиков событий к холсту
@@ -436,7 +454,7 @@ window.bind("<KeyPress>", key_press)
 if __name__ == '__main__':
     # Начальная конфигурация
     Facade = Scene(cnv)
-    fork("Очистить холст")
+    cleaning_not_draw_floor()
 
     # Включается обработчик событий
     window.mainloop()
