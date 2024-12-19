@@ -1,5 +1,5 @@
 # Талышева Олеся ИУ7-55Б
-# Курсач
+# Курсовая работа по Компьютерной графике
 
 # Импортируем библиотеки
 import tkinter as tk
@@ -8,7 +8,7 @@ import tkinter.messagebox as mb
 from tkinter import ttk
 from typing import Optional
 
-from Add_interface import add_object_dialog, insert_delete_spinbox, is_painting
+from Add_interface import add_object_dialog, insert_delete_spinbox, check_input_field, is_painting
 from Load_scene import load_scene_file
 from Del_change_object import delete_object_tree, change_object_tree
 from Scene import Scene
@@ -66,15 +66,15 @@ def fork(text: str) -> None:
         mb.showerror('Ошибка!', "Дождитесь конца отрисовки!")
         return
     is_painting.value = True
-    if text == 'Вращать камеру':
+    if text == 'Вращать камеру' and check_input_field([angle_rotate.get()], "угол поворота", True):
         Facade.rotate_camera(list_of_axis[num_choose_axis], float(angle_rotate.get()))
-    elif text == 'Вращать свет':
+    elif text == 'Вращать свет' and check_input_field([angle_rotate.get()], "угол поворота", True):
         Facade.rotate_light(list_of_axis[num_choose_axis], float(angle_rotate.get()))
     elif text == 'Добавить объект':
         add_object_dialog(Facade, tree, chooser_object_combobox.get())
     elif text == 'Изменить объект':
         change_object_tree(Facade, tree)
-    elif text == 'Изменить сцену':
+    elif text == 'Изменить сцену' and check_input_field([scene_width.get(), scene_height.get()], "новые размеры сцены"):
         if not Facade.change_floor(int(scene_width.get()), int(scene_height.get()), color_scene):
             # возврат старых значений при недопустимых новых
             x, y = Facade.take_floor_num_squares()
@@ -246,6 +246,7 @@ def what_choose_axis(event: tk.Event):
     num_choose_axis = chooser_axis_combobox.current()
 
 # ИЗМЕНЕНИЕ ПОЛОЖЕНИЯ КАМЕРЫ И СВЕТА
+
 # (вращение по х, y и по z изменять)
 camera_light_rotate_frame = tk.Frame(window, bg="lightpink", highlightbackground="PaleVioletRed", highlightcolor="IndianRed", highlightthickness=7)
 camera_light_rotate_frame.grid(row=2, column=0, padx=5, pady=10)
@@ -381,18 +382,22 @@ window.config(menu=menu)
 # Создаёт вкладку меню "Действия" с выпадающим меню с действиями
 menu_in = tk.Menu(menu, tearoff=0)
 
-menu_in.add_command(label='Выбрать цвет плоскости',
-                    command=choose_color)
-menu_in.add_command(label='Масштабировать',
-                    command=lambda: fork('Масштабировать'))
-menu_in.add_command(label='Повернуть по x',
-                    command=lambda: fork('Повернуть по x'))
-menu_in.add_command(label='Повернуть по y',
-                    command=lambda: fork('Повернуть по y'))
-menu_in.add_command(label='Повернуть по z',
-                    command=lambda: fork('Повернуть по z'))
-menu_in.add_command(label='Построить',
-                    command=lambda: fork('Построить'))
+menu_in.add_command(label='Вращать камеру',
+                    command=lambda: fork('Вращать камеру'))
+menu_in.add_command(label='Вращать свет',
+                    command=lambda: fork('Вращать свет'))
+menu_in.add_command(label='Добавить объект',
+                    command=lambda: fork('Добавить объект'))
+menu_in.add_command(label='Изменить объект',
+                    command=lambda: fork('Изменить объект'))
+menu_in.add_command(label='Изменить сцену',
+                    command=lambda: fork('Изменить сцену'))
+menu_in.add_command(label='Удалить объект',
+                    command=lambda: fork('Удалить объект'))
+menu_in.add_command(label='Загрузить сцену',
+                    command=lambda: fork('Загрузить сцену'))
+menu_in.add_command(label='Выгрузить сцену',
+                    command=lambda: fork('Выгрузить сцену'))
 menu_in.add_command(label='Очистить холст',
                     command=lambda: fork('Очистить холст'))
 
@@ -405,11 +410,28 @@ menu_inf = tk.Menu(menu, tearoff=0)
 menu_inf.add_command(label='Информация об авторе', command=lambda: mb.showinfo(
     'Информация об авторе', "Программу разработала студентка МГТУ им.Н.Э.Баумана группы ИУ7-55Б Талышева Олеся Николаевна."))
 menu_inf.add_command(label='Информация о программе', command=lambda: mb.showinfo('Информация о программе',
-                                                                                 "Проектирование цифровых моделей помещений различной планировки."))
+                                                                                 "КУРСОВАЯ РАБОТА НА ТЕМУ:\n"
+                                                                                 "«Разработка программы построения 3Д сцен помещений различной планировки»."))
 menu_inf.add_command(label='Руководство пользователя', command=lambda: mb.showinfo('Руководство пользователя',
-                                                                                   "Программа реализовывает курсовую мою..."
-                                                                                   "Алгоритм запускается по нижитию на кнопку 'Построить'. "
-                                                                                   "Можно перемещать и зумить холст, а также вернуть его в стартовое состояние (кнопка 'Очистить холст')."))
+                                                                                   "Руководство пользователя:\n\n"
+                                                                                   "1. Назначение ПО:\n"
+                                                                                   "- Построение цифровых моделей помещений различной планировки.\n"
+                                                                                   "2. Основные функции программы:\n"
+                                                                                   "- Добавление/изменение/удаление объектов: стены, окна, двери.\n"
+                                                                                   "- Загрузка и выгрузка готовых сцен.\n"
+                                                                                   "- Врещение камеры и источника света вокруг всех трёх осей.\n\n"
+                                                                                   "2. Как пользоваться:\n"
+                                                                                   "- Для добавления нового объекта нажмите кнопку 'Добавить объект'.\n"
+                                                                                   "  * Выберите тип объекта (стена, окно, дверь).\n"
+                                                                                   "  * Укажите параметры: длину, ширину, высоту.\n"
+                                                                                   "- Нажмите 'Построить', чтобы отобразить объекты на холсте.\n"
+                                                                                   "- Для проверки пересечений объектов программа автоматически анализирует их после добавления.\n"
+                                                                                   "- Если объект выходит за границы, вы получите уведомление.\n\n"
+                                                                                   "3. Дополнительные возможности:\n"
+                                                                                   "- Очистка холста для начала работы над новой моделью.\n"
+                                                                                   "- Вкладка 'Информация' содержит данные об авторе и программе.\n\n"
+                                                                                   "Следуйте подсказкам интерфейса для достижения оптимального результата."))
+
 menu.add_cascade(label="Информация", menu=menu_inf)
 
 

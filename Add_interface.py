@@ -63,6 +63,21 @@ def rotate_object(obj_type, entry_arr):
             new_entry_arr += [up_hole]
     return new_entry_arr
 
+# проверяет заполнены ли поля ввода координат числами
+def check_input_field(arr_entry, help_str, is_float = False, echo_err = True):
+    try:
+        for elem in arr_entry:
+            if is_float:
+                float(elem)
+            else:
+                int(elem)
+    except ValueError:
+        if echo_err:
+            messagebox.showerror(
+                'Ошибка!', f"Поля ввода некорректно заполнены ({help_str}).")
+        return False
+    else:
+        return True
 
 
 # Определяем функцию для и добавления объекта
@@ -70,7 +85,11 @@ def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog 
     #print("entry_arr", entry_arr)
     global is_painting
     # Флаг успешности проверок
-    rc = True
+    rc = check_input_field(entry_arr, f"добавление объекта '{obj_type}'")
+    if not rc:
+        return rc
+    if dialog:
+        entry_arr = [int(i) for i in entry_arr]
     # Если пользователь запросил поворот - поворачиваем
     if is_rotate:
         entry_arr = rotate_object(obj_type, entry_arr)
@@ -215,7 +234,7 @@ def add_object_dialog(Facade, table, obj_type, color = None, data_arr = None):
         res_button_text = "Добавить объект"
 
     # Кнопка для подтверждения
-    tk.Button(dialog, text=res_button_text, command=lambda: submit(Facade, table, obj_type, plane_color, [int(i.get()) for i in entry_arr], is_rotate.get(), dialog), width=20, height=1, bd=7, font=("Calibry", 12), activebackground="salmon", bg="khaki", cursor="hand1").pack()
+    tk.Button(dialog, text=res_button_text, command=lambda: submit(Facade, table, obj_type, plane_color, [i.get() for i in entry_arr], is_rotate.get(), dialog), width=20, height=1, bd=7, font=("Calibry", 12), activebackground="salmon", bg="khaki", cursor="hand1").pack()
 
     # Устанавливаем фиксированный размер окна
     dialog.geometry(f"{SIZE_X}x{SIZE_Y}")
