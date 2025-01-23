@@ -77,3 +77,17 @@ class Point:
     # Скалярное произведение с другим вектором (Point)
     def dot(self, point):
         return self.x * point.x + self.y * point.y + self.z * point.z
+
+
+# Пример использования класса Point
+if __name__ == "__main__":
+    point1 = Point(1, 2, 3)
+    point2 = Point(4, 5, 6)
+
+    # Нормализация
+    normalized = point1.copy().normalize()
+    print("Normalized point1:", normalized.coords())
+
+    # Векторное произведение
+    cross_product = point1.cross(point2)
+    print("Cross product of point1 and point2:", cross_product.coords())

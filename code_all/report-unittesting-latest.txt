@@ -1,0 +1,23 @@
+0.29
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.5.0 -- /media/olesya/Learn/sem_5/КУРСАЧ/KYRSACH_CG_5_sem_BMSTU/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /media/olesya/Learn/sem_5/КУРСАЧ/KYRSACH_CG_5_sem_BMSTU
+collecting ... collected 9 items
+
+test_Objects.py::test_wall[red-sizes0-expected0] PASSED                  [ 11%]
+test_Objects.py::test_wall[blue-sizes1-expected1] PASSED                 [ 22%]
+test_Objects.py::test_wall[green-sizes2-expected2] PASSED                [ 33%]
+test_Objects.py::test_door[brown-sizes0-expected0] PASSED                [ 44%]
+test_Objects.py::test_door[white-sizes1-expected1] PASSED                [ 55%]
+test_Objects.py::test_door[black-sizes2-expected2] PASSED                [ 66%]
+test_Objects.py::test_window[transparent-sizes0-expected0] PASSED        [ 77%]
+test_Objects.py::test_window[blue-sizes1-expected1] PASSED               [ 88%]
+test_Objects.py::test_window[frosted-sizes2-expected2] PASSED            [100%]
+
+============================== 9 passed in 0.03s ===============================
+Name         Stmts   Miss  Cover   Missing
+------------------------------------------
+Objects.py     217    154    29%   24-28, 31-34, 44, 47-61, 83, 86-136, 156, 159-215, 222, 226-228, 232, 235, 238, 242-245, 248-251, 254-257, 261-266, 270-281, 285-286, 290-293, 299-313
+------------------------------------------
+TOTAL          217    154    29%

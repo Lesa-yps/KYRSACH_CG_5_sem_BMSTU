@@ -82,6 +82,7 @@ def check_input_field(arr_entry, help_str, is_float = False, echo_err = True):
 
 # Определяем функцию для и добавления объекта
 def submit(Facade, table, obj_type, color, entry_arr, is_rotate = False, dialog = None):
+    #print("entry_arr", entry_arr)
     global is_painting
     # Флаг успешности проверок
     rc = check_input_field(entry_arr, f"добавление объекта '{obj_type}'")

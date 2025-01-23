@@ -31,6 +31,7 @@ class Matrix:
             for j in range(4):
                 for k in range(4):
                     res_matrix[i][j] += matrix1[i][k] * matrix2[k][j]
+        # print(res_matrix)
         return res_matrix
         
     # функция поворачивает график
@@ -51,6 +52,7 @@ class Matrix:
                             [-sin(angle), cos(angle), 0, 0],
                             [0,          0, 1, 0],
                             [0,          0, 0, 1]]
+        # print(axis[0], rotating_matrix, sin(angle), cos(angle), angle)
         self.matrix = self.multy_matrix(self.matrix, rotating_matrix)
         # self.print_matrix()
         return self

@@ -12,6 +12,7 @@ def take_del_select_table_data(tree):
         item_id = selected_items[0]
         # Извлекаем данные из строки
         item_data = tree.item(item_id, "values")
+        print("Данные выбранной строки:", item_data)
         res = [item_data[0]] + [int(i) for i in item_data[1:]]
         # Удаляем выбранную строку из таблицы
         tree.delete(item_id)

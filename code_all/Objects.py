@@ -304,3 +304,23 @@ class Objects:
         for elem in self.walls + self.doors + self.windows:
             arr_planes += elem.calc_list_planes()
         return arr_planes
+
+
+
+# Пример использования класса Objects
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Обьекты")
+
+    canvas = tk.Canvas(root, width=800, height=600, bg="white")
+    canvas.pack()
+
+    objects = Objects(canvas)
+
+    objects.add_wall(((Point(100, 100, 100), Point(300, 300, 300)), None, "yellow", "pink"))
+    objects.add_window(((Point(150, 150, 150), Point(400, 400, 400)),))
+    objects.add_door(((Point(500, 500, 500), Point(600, 600, 600)),))
+
+    objects.draw()
+
+    root.mainloop()
